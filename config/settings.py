@@ -25,7 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production-123456789')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default='True') == 'True'
+def _as_bool(value, default=False):
+    if value is None:
+        return default
+    return str(value).strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+DEBUG = _as_bool(config('DEBUG', default='True'))
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.onrender.com', cast=Csv())
 
@@ -160,7 +166,11 @@ AUTH_USER_MODEL = 'accounts.User'
 
 
 # CORS
-CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default='True') == 'True'
+_cors_allowed_origins = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
+if _cors_allowed_origins:
+    CORS_ALLOWED_ORIGINS = _cors_allowed_origins
+else:
+    CORS_ALLOW_ALL_ORIGINS = _as_bool(config('CORS_ALLOW_ALL_ORIGINS', default='True'))
 
 
 # REST Framework
