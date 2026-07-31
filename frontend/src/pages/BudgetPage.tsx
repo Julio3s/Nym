@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import Input from '../components/Input';
 import CategoryChip from '../components/CategoryChip';
 import BackButton from '../components/BackButton';
 import { budgetService, type Budget, type BudgetProgression } from '../services/budgetService';
