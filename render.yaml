@@ -11,19 +11,23 @@ services:
       - key: DEBUG
         value: False
       - key: DB_ENGINE
-        value: django.db.backends.sqlite3
+        value: django.db.backends.postgresql
       - key: DB_NAME
-        value: /var/data/db.sqlite3
+        generateValue: true
+      - key: DB_USER
+        generateValue: true
+      - key: DB_PASSWORD
+        generateValue: true
+      - key: DB_HOST
+        generateValue: true
+      - key: DB_PORT
+        value: "5432"
       - key: GROQ_API_KEY
         sync: false
       - key: ALLOWED_HOSTS
-        value: "*.onrender.com"
+        value: "mny-backend.onrender.com"
       - key: CORS_ALLOW_ALL_ORIGINS
         value: True
-    disk:
-      name: sqlite-data
-      mountPath: /var/data
-      sizeGB: 1
 
   - type: web
     name: mny-frontend
