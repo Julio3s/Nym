@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: mny-backend
+    env: python
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: DB_ENGINE
+        value: django.db.backends.sqlite3
+      - key: DB_NAME
+        value: /var/data/db.sqlite3
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ALLOWED_HOSTS
+        value: "*.onrender.com"
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: True
+    disk:
+      name: sqlite-data
+      mountPath: /var/data
+      sizeGB: 1
+
+  - type: web
+    name: mny-frontend
+    env: static
+    region: frankfurt
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://mny-backend.onrender.com/api
