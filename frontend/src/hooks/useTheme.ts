@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
-type Theme = 'light' | 'dark';
+type Theme = 'dark';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'dark' || stored === 'light') return stored;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
-
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.documentElement.style.colorScheme = 'dark';
 
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    try {
+      localStorage.setItem('theme', 'dark');
+    } catch {
+      // Local storage can be unavailable in restrictive browser modes.
+    }
+  }, []);
 
-  return { theme, toggleTheme };
+  return {
+    theme: 'dark' as Theme,
+    toggleTheme: () => {},
+  };
 }

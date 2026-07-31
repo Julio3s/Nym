@@ -15,6 +15,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
   width: 100%;
+  color-scheme: dark;
 }
 
 body {
@@ -128,6 +129,88 @@ h4 { font-size: var(--font-size-lg); }
   display: flex;
   min-height: 100vh;
   background: var(--color-bg);
+  position: relative;
+  z-index: 1;
+}
+
+.sticker-rain {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sticker-rain::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.18), transparent 32%),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.14), transparent 28%),
+    radial-gradient(circle at center, rgba(8, 15, 30, 0.15), transparent 55%);
+  filter: blur(16px);
+}
+
+.sticker-rain__item {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(17, 24, 39, 0.75));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: var(--sticker-opacity, 0.5);
+  animation-name: stickerFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+.sticker-rain__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(129, 140, 248, 0.16);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.sticker-rain__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.sticker-rain__label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--color-text);
+}
+
+@keyframes stickerFall {
+  0% {
+    transform: translate3d(0, -18vh, 0) rotate(var(--sticker-rotate, 0deg));
+    opacity: 0;
+  }
+
+  10% {
+    opacity: var(--sticker-opacity, 0.5);
+  }
+
+  100% {
+    transform: translate3d(var(--sticker-drift, 0px), 120vh, 0) rotate(calc(var(--sticker-rotate, 0deg) + 18deg));
+    opacity: 0;
+  }
 }
 
 .app-sidebar {
