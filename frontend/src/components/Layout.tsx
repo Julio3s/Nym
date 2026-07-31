@@ -7,6 +7,7 @@ const navItems = [
   { path: '/expenses', label: 'Transactions', icon: '💸' },
   { path: '/revenues', label: 'Revenus', icon: '💰' },
   { path: '/budgets', label: 'Budgets', icon: '🎯' },
+  { path: '/revenue-sources', label: 'Sources de revenus', icon: '🏦' },
   { path: '/profile', label: 'Profil', icon: '👤' },
 ];
 

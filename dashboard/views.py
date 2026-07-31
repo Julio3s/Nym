@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from decouple import config
-from expenses.models import Expense
+from expenses.models import Expense, Category, RevenueSource
 from budgets.models import Budget
 
 
@@ -51,7 +51,13 @@ Réponds en français, max 150 mots, sois amical et concret."""
         messages.append({"role": "user", "content": request.data.get('message', '')})
 
         try:
-            groq_key = config('GROQ_API_KEY')
+            groq_key = config('GROQ_API_KEY', default='')
+            if not groq_key:
+                return Response({
+                    'response': "La clé API GROQ n'est pas configurée. Veuillez contacter l'administrateur.",
+                    'action': None
+                }, status=500)
+
             resp = requests.post(
                 'https://api.groq.com/openai/v1/chat/completions',
                 json={"model": "llama-3.3-70b-versatile", "messages": messages, "temperature": 0.7, "max_tokens": 500},
@@ -61,6 +67,10 @@ Réponds en français, max 150 mots, sois amical et concret."""
             resp.raise_for_status()
             content = resp.json()['choices'][0]['message']['content']
             return Response({'response': content, 'action': None})
+        except requests.exceptions.Timeout:
+            return Response({'response': "Désolé, le service met trop de temps à répondre. Veuillez réessayer.", 'action': None}, status=500)
+        except requests.exceptions.RequestException as e:
+            return Response({'response': f"Erreur de connexion: {str(e)}", 'action': None}, status=500)
         except Exception as e:
             return Response({'response': f"Erreur: {str(e)}", 'action': None}, status=500)
 
@@ -71,15 +81,17 @@ Réponds en français, max 150 mots, sois amical et concret."""
 
         # --- CRÉER BUDGET ---
         if 'budget' in msg_lower and ('crée' in msg_lower or 'creer' in msg_lower or 'ajoute' in msg_lower or 'fixe' in msg_lower or 'met' in msg_lower or 'nouveau' in msg_lower):
-            categories = ['alimentation', 'transport', 'logement', 'loisirs', 'sante', 'education', 'shopping', 'autres']
+            categories = [c.name for c in Category.objects.filter(user=user, type='depense')]
+            if not categories:
+                categories = ['alimentation', 'transport', 'logement', 'loisirs', 'sante', 'education', 'shopping', 'autres']
             categorie = None
             for cat in categories:
-                if cat in msg_lower:
+                if cat.lower() in msg_lower:
                     categorie = cat
                     break
             if not categorie:
                 return None
-            
+
             # Extraire le montant
             montants = re.findall(r'(\d+[\s]?\d*)', msg_lower)
             montant = None
@@ -88,7 +100,7 @@ Réponds en français, max 150 mots, sois amical et concret."""
                 if val > 0:
                     montant = val
                     break
-            
+
             if montant and categorie:
                 mois = today.replace(day=1)
                 existing = Budget.objects.filter(user=user, categorie=categorie, mois=mois).first()
@@ -116,14 +128,16 @@ Réponds en français, max 150 mots, sois amical et concret."""
                 if val > 0 and val < 100000000:
                     montant = val
                     break
-            
-            categories = ['alimentation', 'transport', 'logement', 'loisirs', 'sante', 'education', 'shopping', 'autres']
+
+            categories = [c.name for c in Category.objects.filter(user=user, type='depense')]
+            if not categories:
+                categories = ['alimentation', 'transport', 'logement', 'loisirs', 'sante', 'education', 'shopping', 'autres']
             categorie = 'autres'
             for cat in categories:
-                if cat in msg_lower:
+                if cat.lower() in msg_lower:
                     categorie = cat
                     break
-            
+
             if montant:
                 expense = Expense.objects.create(
                     user=user, type='depense', montant=montant,
@@ -143,24 +157,26 @@ Réponds en français, max 150 mots, sois amical et concret."""
                 if val > 0 and val < 100000000:
                     montant = val
                     break
-            
-            categories_revenu = ['salaire', 'freelance', 'investissement', 'vente', 'autres']
-            categorie = 'autres'
-            for cat in categories_revenu:
-                if cat in msg_lower:
-                    categorie = cat
+
+            revenue_sources = [rs.name for rs in RevenueSource.objects.filter(user=user, is_active=True)]
+            if not revenue_sources:
+                revenue_sources = ['salaire', 'freelance', 'investissement', 'vente', 'autres']
+            source = 'autres'
+            for rs in revenue_sources:
+                if rs.lower() in msg_lower:
+                    source = rs
                     break
-            
+
             if 'salaire' in msg_lower:
-                categorie = 'salaire'
-            
+                source = 'salaire'
+
             if montant:
                 revenue = Expense.objects.create(
                     user=user, type='revenu', montant=montant,
-                    categorie=categorie, description=msg, date=today
+                    categorie=source, description=msg, date=today
                 )
                 return Response({
-                    'response': f"✅ Revenu de {montant:,.0f} FCFA en '{categorie}' ajouté !",
+                    'response': f"✅ Revenu de {montant:,.0f} FCFA en '{source}' ajouté !",
                     'action': {'type': 'revenue_created', 'id': revenue.id}
                 })
 

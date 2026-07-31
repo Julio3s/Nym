@@ -1,14 +1,8 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import Input from './Input';
 import Button from './Button';
 import type { ExpenseFormData } from '../services/expenseService';
-
-const CATEGORIES = [
-  'alimentation', 'transport', 'logement', 'loisirs',
-  'sante', 'education', 'shopping', 'autres',
-];
-
-const REVENU_CATEGORIES = ['salaire', 'freelance', 'investissement', 'vente', 'autres'];
+import { categoryService, type Category } from '../services/categoryService';
 
 interface ExpenseFormProps {
   initialData?: ExpenseFormData;
@@ -19,12 +13,41 @@ interface ExpenseFormProps {
 
 export default function ExpenseForm({ initialData, onSubmit, loading, mode = 'depense' }: ExpenseFormProps) {
   const [montant, setMontant] = useState(initialData?.montant?.toString() || '');
-  const [categorie, setCategorie] = useState(initialData?.categorie || (mode === 'revenu' ? 'salaire' : 'alimentation'));
+  const [categorie, setCategorie] = useState(initialData?.categorie || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
   const [error, setError] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [newCategory, setNewCategory] = useState('');
+  const [showNewCategory, setShowNewCategory] = useState(false);
 
-  const categories = mode === 'revenu' ? REVENU_CATEGORIES : CATEGORIES;
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await categoryService.getCategories(mode);
+        setCategories(data);
+        if (!initialData?.categorie && data.length > 0) {
+          setCategorie(data[0].name);
+        }
+      } catch {
+        // fallback static categories handled below if needed
+      }
+    };
+    loadCategories();
+  }, [mode, initialData?.categorie]);
+
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) return;
+    try {
+      const created = await categoryService.createCategory({ name: newCategory.trim(), type: mode });
+      setCategories((prev) => [...prev, created]);
+      setCategorie(created.name);
+      setNewCategory('');
+      setShowNewCategory(false);
+    } catch {
+      setError("Impossible d'ajouter la catégorie");
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -65,28 +88,53 @@ export default function ExpenseForm({ initialData, onSubmit, loading, mode = 'de
         <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 500, color: 'var(--color-text-secondary)' }}>
           Catégorie
         </label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
           {categories.map((cat) => (
             <button
-              key={cat}
+              key={cat.id}
               type="button"
-              onClick={() => setCategorie(cat)}
+              onClick={() => setCategorie(cat.name)}
               style={{
                 padding: '6px 14px',
                 borderRadius: 'var(--radius-full)',
-                border: `2px solid ${categorie === cat ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                backgroundColor: categorie === cat ? 'var(--color-primary-light)' : 'transparent',
-                color: categorie === cat ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                fontWeight: categorie === cat ? 600 : 400,
+                border: `2px solid ${categorie === cat.name ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                backgroundColor: categorie === cat.name ? 'var(--color-primary-light)' : 'transparent',
+                color: categorie === cat.name ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                fontWeight: categorie === cat.name ? 600 : 400,
                 cursor: 'pointer',
                 transition: 'all var(--transition-fast)',
                 textTransform: 'capitalize',
               }}
             >
-              {cat}
+              {cat.name}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setShowNewCategory((v) => !v)}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 'var(--radius-full)',
+              border: '2px dashed var(--color-border)',
+              backgroundColor: 'transparent',
+              color: 'var(--color-text-secondary)',
+              cursor: 'pointer',
+            }}
+          >
+            + Nouvelle catégorie
+          </button>
         </div>
+
+        {showNewCategory && (
+          <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+            <Input
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="Nom de la catégorie"
+            />
+            <Button type="button" onClick={handleAddCategory}>Ajouter</Button>
+          </div>
+        )}
       </div>
 
       <Input

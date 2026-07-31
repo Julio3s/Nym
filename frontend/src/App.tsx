@@ -13,6 +13,7 @@ import BudgetPage from './pages/BudgetPage';
 import Profile from './pages/Profile';
 import RevenueNew from './pages/RevenueNew';
 import RevenueList from './pages/RevenueList';
+import RevenueSources from './pages/RevenueSources';
 import AIChat from './components/AIChat';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
           <Route path="/budgets" element={<PrivateRoute><Layout><BudgetPage /></Layout></PrivateRoute>} />
           <Route path="/revenues" element={<PrivateRoute><Layout><RevenueList /></Layout></PrivateRoute>} />
           <Route path="/revenues/new" element={<PrivateRoute><Layout><RevenueNew /></Layout></PrivateRoute>} />
+          <Route path="/revenue-sources" element={<PrivateRoute><Layout><RevenueSources /></Layout></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Layout><Profile /></Layout></PrivateRoute>} />
         </Routes>
         <AIChat />
