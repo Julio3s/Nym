@@ -28,10 +28,13 @@ services:
         value: "mny-backend.onrender.com"
       - key: CORS_ALLOW_ALL_ORIGINS
         value: True
+    disk:
+      name: sqlite-data
+      mountPath: /var/data
+      sizeGB: 1
 
-  - type: web
+  - type: static_site
     name: mny-frontend
-    env: static
     region: frankfurt
     buildCommand: cd frontend && npm install && npm run build
     publishPath: frontend/dist
