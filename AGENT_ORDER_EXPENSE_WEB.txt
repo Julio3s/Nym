@@ -1,0 +1,253 @@
+===================================================================
+AGENT_ORDER — GESTION DES DEPENSES (VERSION WEB)
+===================================================================
+Stack : Django 4.2 + DRF (backend) / React 18 + Vite (frontend)
+        / PostgreSQL (base de données) — SANS Docker
+Auth : JWT (djangorestframework-simplejwt)
+State frontend : Context API ou Zustand (léger, pas de Redux)
+Graphiques : Recharts
+Déploiement cible : Render/Railway (backend + Postgres) + Netlify
+(frontend) — cohérent avec tes autres projets (ORIENTA+).
+
+Environnement local sans Docker :
+  - Python venv (venv/virtualenv) pour Django
+  - PostgreSQL installé nativement (service local) ou instance
+    managée distante dès le dev (ex. Render/Neon en dev aussi, pour
+    éviter tout écart de config)
+  - Node/npm en local pour React
+
+STRUCTURE : 6 PHASES / 18 AGENTS
+
+===================================================================
+PHASE 0 — SETUP & FONDATIONS
+===================================================================
+
+AGENT 0.1 — Setup backend Django
+Objectif : Projet Django prêt, sans Docker.
+Livrables :
+  - venv créé, requirements.txt (django, djangorestframework,
+    psycopg2-binary, django-cors-headers, python-decouple,
+    djangorestframework-simplejwt)
+  - django-admin startproject config . / apps: accounts, expenses,
+    budgets, dashboard
+  - Fichier .env (via python-decouple) pour DB_NAME, DB_USER,
+    DB_PASSWORD, SECRET_KEY
+  - settings.py configuré pour PostgreSQL local (DATABASES) + CORS
+Critère de validation : `python manage.py runserver` démarre sans
+erreur, connexion Postgres locale confirmée par `migrate`.
+
+AGENT 0.2 — Setup frontend React
+Objectif : Projet React prêt.
+Livrables :
+  - npm create vite@latest (template react + TS conseillé)
+  - Structure : src/{components,pages,hooks,services,context,styles}
+  - Axios configuré avec baseURL vers l'API + intercepteur JWT
+  - react-router-dom installé, routes de base définies
+Critère de validation : `npm run dev` sert l'app, requête test vers
+l'API Django (health check) réussit malgré CORS.
+
+AGENT 0.3 — Design system
+Objectif : Base visuelle réutilisable, cohérente avec tes autres
+projets (palette + typographie à définir ensemble si besoin).
+Livrables :
+  - Variables CSS (couleurs, espacements, typographie)
+  - Composants de base : Button, Input, Card, CategoryChip, Modal
+  - Thème clair + sombre (toggle via CSS variables)
+Critère de validation : page de démo affichant tous les composants
+dans les deux thèmes.
+
+===================================================================
+PHASE 1 — AUTHENTIFICATION
+===================================================================
+
+AGENT 1.1 — Modèle User & API auth (Django)
+Objectif : Backend d'authentification.
+Livrables :
+  - Modèle User (extension AbstractUser ou User standard + profil)
+  - Endpoints : POST /api/auth/register, /api/auth/login (JWT),
+    /api/auth/refresh, /api/auth/me
+  - Serializers + validation (email unique, mdp fort)
+Critère de validation : tests via Postman/curl — register puis
+login retourne un access + refresh token valides.
+
+AGENT 1.2 — Écrans Connexion / Inscription (React)
+Objectif : UI + intégration API.
+Livrables :
+  - Pages Login / Register avec validation de formulaire
+  - AuthContext (stockage token, état user, logout)
+  - Route protégée (PrivateRoute) qui redirige vers /login si
+    non authentifié
+Critère de validation : inscription + connexion + déconnexion
+fonctionnels de bout en bout, token persisté (localStorage) et
+rafraîchi automatiquement à expiration.
+
+===================================================================
+PHASE 2 — DEPENSES (CRUD CŒUR DE L'APP)
+===================================================================
+
+AGENT 2.1 — Modèle Expense & API (Django)
+Objectif : Backend des dépenses.
+Livrables :
+  - Modèle Expense { user(FK), montant, categorie, description,
+    date, created_at }
+  - ViewSet DRF (CRUD complet) + permission IsOwner (chaque user ne
+    voit que ses dépenses)
+  - Filtres query params : categorie, date_debut, date_fin, recherche
+  - Pagination (limit/offset ou page number)
+Critère de validation : CRUD + filtres testés via Postman, isolation
+des données entre deux comptes différents vérifiée.
+
+AGENT 2.2 — Écran "Ajouter/Modifier une dépense" (React)
+Objectif : Formulaire partagé create/edit.
+Livrables :
+  - Composant ExpenseForm réutilisable (mode ajout / mode édition)
+  - Sélecteur de catégorie avec icônes, date picker, validation
+    (montant > 0)
+  - Service expenseService.js (appels API centralisés)
+Critère de validation : création et modification persistées côté
+backend, retour visuel immédiat (toast succès/erreur).
+
+AGENT 2.3 — Liste des dépenses & recherche (React)
+Objectif : Affichage + interactions.
+Livrables :
+  - Page Liste des dépenses : tableau ou cards, groupées par date
+  - Barre de recherche + filtres (catégorie, période) synchronisés
+    avec les query params de l'API
+  - Suppression avec confirmation (modal) + optimistic update
+Critère de validation : recherche/filtres réactifs, suppression
+reflétée immédiatement sans reload complet.
+
+AGENT 2.4 — Page Détails d'une dépense
+Objectif : Vue dédiée.
+Livrables :
+  - Route /expenses/:id avec affichage complet + actions
+    modifier/supprimer
+Critère de validation : navigation fluide depuis la liste, retour
+en arrière conserve les filtres actifs.
+
+===================================================================
+PHASE 3 — TABLEAU DE BORD & STATISTIQUES
+===================================================================
+
+AGENT 3.1 — Endpoints d'agrégation (Django)
+Objectif : Logique métier côté serveur (éviter de tout calculer en
+JS, plus fiable et plus rapide).
+Livrables :
+  - Endpoint /api/dashboard/summary : total du jour, total du mois,
+    solde
+  - Endpoint /api/dashboard/by-category : répartition par catégorie
+    (mois en cours, paramétrable)
+  - Endpoint /api/dashboard/timeline : évolution sur période
+    (utilisation de django.db.models.functions + annotate)
+Critère de validation : résultats vérifiés avec un jeu de données de
+test (fixture Django ou script de seed).
+
+AGENT 3.2 — Page Dashboard (React)
+Objectif : Vue d'ensemble.
+Livrables :
+  - Cards Solde / Dépenses du jour / Dépenses du mois
+  - Bouton rapide "Ajouter une dépense"
+  - Hook useDashboard (fetch + cache léger, revalidation après
+    ajout/suppression)
+Critère de validation : dashboard à jour après toute action CRUD
+sans rechargement manuel de la page.
+
+AGENT 3.3 — Graphiques (Recharts)
+Objectif : Visualisation.
+Livrables :
+  - Graphique circulaire (PieChart) : répartition par catégorie
+  - Graphique en courbe (LineChart) : évolution des dépenses
+  - Sélecteur de période (7j / 30j / mois en cours)
+Critère de validation : graphiques réactifs, légendes claires,
+couleurs cohérentes avec les chips de catégorie.
+
+===================================================================
+PHASE 4 — BUDGET & REVENUS
+===================================================================
+
+AGENT 4.1 — Modèle Budget & API (Django)
+Objectif : Backend des budgets.
+Livrables :
+  - Modèle Budget { user(FK), categorie, montant, mois }
+  - Endpoint CRUD + endpoint "progression" (dépensé vs budget par
+    catégorie pour le mois en cours)
+Critère de validation : progression correcte vérifiée sur données
+de test, contrainte unique (user, categorie, mois) respectée.
+
+AGENT 4.2 — Page Budget (React)
+Objectif : UI de gestion des budgets.
+Livrables :
+  - Définir/modifier un budget par catégorie
+  - Barres de progression avec code couleur selon seuil (vert/
+    orange/rouge)
+Critère de validation : dépassement visuellement signalé, cohérent
+avec les données réelles du backend.
+
+AGENT 4.3 — Alerte de seuil de budget
+Objectif : Prévenir avant dépassement.
+Livrables :
+  - Calcul côté backend (champ "pourcentage_atteint" dans l'API
+    progression) + notification frontend (toast/bannière) quand
+    ≥ 80%
+Critère de validation : alerte déclenchée après ajout d'une dépense
+qui franchit le seuil, sans faux positif.
+
+AGENT 4.4 — Gestion des revenus & solde automatique
+Objectif : Distinguer revenus/dépenses.
+Livrables :
+  - Champ type (revenu | depense) sur le modèle Transaction
+    (renommage/évolution du modèle Expense — migration Django à
+    prévoir proprement avec makemigrations/migrate)
+  - Écran "Ajouter un revenu" côté React (réutilise ExpenseForm en
+    mode revenu)
+  - Solde = somme(revenus) - somme(dépenses) affiché sur le Dashboard
+Critère de validation : exemple du brief reproductible (salaire +
+charges = solde correct).
+
+===================================================================
+PHASE 5 — PROFIL, PARAMETRES, EXPORT & DEPLOIEMENT
+===================================================================
+
+AGENT 5.1 — Profil & Paramètres (React + Django)
+Objectif : Gestion du compte.
+Livrables :
+  - Endpoint update profil (nom, email, mot de passe)
+  - Page Profil (React) + Page Paramètres (mode sombre persistant
+    via localStorage, choix devise FCFA par défaut)
+Critère de validation : modifications persistées et reflétées après
+rechargement de la page.
+
+AGENT 5.2 — Export PDF / Excel
+Objectif : Export des données filtrées.
+Livrables :
+  - Endpoint Django /api/expenses/export?format=pdf|xlsx (utilise
+    reportlab ou weasyprint pour PDF, openpyxl pour Excel)
+  - Bouton "Exporter" côté React qui déclenche le téléchargement
+Critère de validation : fichier généré cohérent avec les filtres
+actifs à l'écran.
+
+AGENT 5.3 — Déploiement sans Docker
+Objectif : Mise en ligne.
+Livrables :
+  - Backend : déploiement sur Render/Railway (build via
+    requirements.txt, gunicorn, variables d'env, Postgres managé)
+  - Frontend : build Vite déployé sur Netlify/Vercel, variable
+    VITE_API_URL pointant vers le backend en prod
+  - CORS et ALLOWED_HOSTS ajustés pour les domaines de prod
+Critère de validation : app accessible en ligne, flux complet
+(inscription → dépense → dashboard) fonctionnel en production.
+
+===================================================================
+ORDRE D'EXECUTION RECOMMANDE
+===================================================================
+0.1 → 0.2 → 0.3 → 1.1 → 1.2 → 2.1 → 2.2 → 2.3 → 2.4
+→ 3.1 → 3.2 → 3.3 → 4.1 → 4.2 → 4.3 → 4.4 → 5.1 → 5.2 → 5.3
+
+Règle générale pour chaque agent :
+1. Lire le code existant avant de coder (ne pas dupliquer un modèle,
+   serializer ou composant déjà créé par un agent précédent).
+2. Chaque endpoint Django doit avoir ses migrations appliquées
+   (makemigrations + migrate) avant de passer à l'agent suivant.
+3. Ne jamais casser une fonctionnalité validée par un agent précédent.
+4. Terminer chaque agent par le test manuel décrit dans "Critère de
+   validation" avant de le considérer terminé.
