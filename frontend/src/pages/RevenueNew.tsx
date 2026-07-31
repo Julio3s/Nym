@@ -13,7 +13,7 @@ export default function RevenueNew() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '50px auto', padding: 20 }}>
+    <div className="page-panel page-panel--narrow">
       <BackButton to="/expenses" label="← Liste des transactions" />
       <h1 style={{ marginBottom: 'var(--space-lg)' }}>Nouveau revenu</h1>
       <Card>

@@ -32,7 +32,7 @@ export default function ExpenseEdit() {
   if (loading) return <div style={{ textAlign: 'center', padding: 50 }}>Chargement...</div>;
 
   return (
-    <div style={{ maxWidth: 600, margin: '50px auto', padding: 20 }}>
+    <div className="page-panel page-panel--narrow">
       <BackButton to="/expenses" label="← Liste des dépenses" />
       <h1 style={{ marginBottom: 'var(--space-lg)' }}>Modifier la dépense</h1>
       <Card>

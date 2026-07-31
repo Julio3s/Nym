@@ -64,11 +64,14 @@ export default function ExpenseList() {
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: '30px auto', padding: 20 }}>
+    <div className="page-panel page-panel--wide">
       <BackButton to="/" label="← Accueil" />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-        <h1>Mes transactions</h1>
-        <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+
+      <div className="page-header-row">
+        <div>
+          <h1>Mes transactions</h1>
+        </div>
+        <div className="page-header-actions">
           <Link to="/expenses/new">
             <Button>+ Dépense</Button>
           </Link>
@@ -78,7 +81,6 @@ export default function ExpenseList() {
         </div>
       </div>
 
-      {/* Filtres */}
       <Card style={{ marginBottom: 'var(--space-lg)' }}>
         <div style={{ marginBottom: 'var(--space-md)' }}>
           <input
@@ -96,15 +98,13 @@ export default function ExpenseList() {
           />
         </div>
 
-        {/* Filtre type */}
-        <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+        <div className="filter-row" style={{ marginBottom: 'var(--space-md)' }}>
           <Button size="sm" variant={!typeFilter ? 'primary' : 'ghost'} onClick={() => setFilter('type', '')}>Tout</Button>
           <Button size="sm" variant={typeFilter === 'depense' ? 'primary' : 'ghost'} onClick={() => setFilter('type', 'depense')}>Dépenses</Button>
           <Button size="sm" variant={typeFilter === 'revenu' ? 'primary' : 'ghost'} onClick={() => setFilter('type', 'revenu')}>Revenus</Button>
         </div>
 
-        {/* Filtre catégorie */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
+        <div className="filter-row filter-row--chips">
           {CATEGORIES.map((cat) => (
             <CategoryChip
               key={cat}
@@ -124,18 +124,17 @@ export default function ExpenseList() {
         </div>
       </Card>
 
-      {/* Liste */}
       {loading ? (
         <p style={{ textAlign: 'center', padding: 40 }}>Chargement...</p>
       ) : expenses.length === 0 ? (
         <Card><p style={{ textAlign: 'center', padding: 20 }}>Aucune transaction trouvée</p></Card>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+        <div className="stack-list">
           {expenses.map((expense) => (
             <Card key={expense.id} padding="var(--space-md)">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)' }}>
+              <div className="card-row">
+                <div className="expense-meta">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)', flexWrap: 'wrap' }}>
                     <span style={{
                       fontSize: 'var(--font-size-xs)',
                       fontWeight: 600,
@@ -166,7 +165,7 @@ export default function ExpenseList() {
                   }}>
                     {expense.type === 'revenu' ? '+' : '-'}{formatMontant(expense.montant)}
                   </p>
-                  <div style={{ display: 'flex', gap: 'var(--space-xs)', marginTop: 'var(--space-xs)' }}>
+                  <div className="card-actions" style={{ marginTop: 'var(--space-xs)' }}>
                     <Link to={`/expenses/${expense.id}`}>
                       <Button variant="ghost" size="sm">Détail</Button>
                     </Link>
@@ -184,9 +183,8 @@ export default function ExpenseList() {
         </div>
       )}
 
-      {/* Pagination */}
       {total > 20 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-md)', marginTop: 'var(--space-lg)', flexWrap: 'wrap' }}>
           <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
             Précédent
           </Button>

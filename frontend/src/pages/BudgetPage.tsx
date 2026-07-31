@@ -74,7 +74,7 @@ export default function BudgetPage() {
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(value);
 
   return (
-    <div style={{ maxWidth: 800, margin: '30px auto', padding: 20 }}>
+    <div className="page-panel page-panel--wide">
       <BackButton to="/" label="← Dashboard" />
       <h1 style={{ marginBottom: 'var(--space-lg)' }}>Budgets mensuels</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 'var(--space-xl)' }}>
@@ -92,11 +92,11 @@ export default function BudgetPage() {
 
             return (
               <Card key={categorie} padding="var(--space-md)">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-sm)' }}>
+                <div className="card-row" style={{ marginBottom: 'var(--space-sm)' }}>
                   <CategoryChip category={categorie} />
                   
                   {isEditing ? (
-                    <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center', flexWrap: 'wrap' }}>
                       <input
                         type="number"
                         step="0.01"

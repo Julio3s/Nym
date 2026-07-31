@@ -36,14 +36,14 @@ export default function ExpenseDetail() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '50px auto', padding: 20 }}>
+    <div className="page-panel page-panel--narrow">
       <Link to="/expenses" style={{ color: 'var(--color-text-secondary)', marginBottom: 'var(--space-md)', display: 'inline-block' }}>
         ← Retour à la liste
       </Link>
       <h1 style={{ marginBottom: 'var(--space-lg)' }}>Détail de la dépense</h1>
 
       <Card>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-lg)' }}>
+        <div className="card-row card-row--top" style={{ marginBottom: 'var(--space-lg)' }}>
           <div>
             <CategoryChip category={expense.categorie} />
             <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)', marginTop: 'var(--space-sm)' }}>
@@ -66,7 +66,7 @@ export default function ExpenseDetail() {
           Créé le {new Date(expense.created_at).toLocaleString('fr-FR')}
         </p>
 
-        <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
+        <div className="card-actions" style={{ marginTop: 'var(--space-lg)' }}>
           <Link to={`/expenses/${expense.id}/edit`} style={{ flex: 1 }}>
             <Button variant="secondary" style={{ width: '100%' }}>Modifier</Button>
           </Link>

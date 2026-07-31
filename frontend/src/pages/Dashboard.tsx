@@ -40,7 +40,7 @@ export default function Dashboard() {
       </div>
 
       {/* Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+      <div className="dashboard-stats-grid">
         {cards.map((card, i) => (
           <div key={i} style={{
             background: 'var(--color-surface)',
@@ -71,14 +71,14 @@ export default function Dashboard() {
       </div>
 
       {/* Quick actions */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', flexWrap: 'wrap' }}>
+      <div className="page-header-actions" style={{ marginBottom: '32px' }}>
         <Link to="/expenses/new"><button style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', background: 'var(--gradient-primary)', color: 'white', fontWeight: 600, fontSize: 'var(--font-size-sm)', boxShadow: 'var(--shadow-primary)' }}>+ Dépense</button></Link>
         <Link to="/revenues/new"><button style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', background: 'var(--gradient-success)', color: 'white', fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>+ Revenu</button></Link>
         <Link to="/budgets"><button style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text)', fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>🎯 Budgets</button></Link>
       </div>
 
       {/* Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+      <div className="dashboard-charts-grid">
         {/* Pie */}
         <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
           <h3 style={{ marginBottom: '20px', fontSize: 'var(--font-size-lg)' }}>Répartition par catégorie</h3>
@@ -115,7 +115,7 @@ export default function Dashboard() {
 
       {/* Recent revenues */}
       <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div className="card-row" style={{ marginBottom: '20px' }}>
           <h3 style={{ fontSize: 'var(--font-size-lg)' }}>Derniers revenus</h3>
           <Link to="/revenues" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>Voir tout →</Link>
         </div>
@@ -124,7 +124,7 @@ export default function Dashboard() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {recentRevenues.map((rev) => (
-              <div key={rev.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-bg-secondary)', transition: 'background var(--transition-fast)' }}
+              <div key={rev.id} className="card-row" style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-bg-secondary)', transition: 'background var(--transition-fast)' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

@@ -21,37 +21,39 @@ export default function Login() {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '100px auto', padding: 20 }}>
-      <h1>Connexion</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8, margin: '8px 0' }}
-          />
-        </div>
-        <div>
-          <label>Mot de passe</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8, margin: '8px 0' }}
-          />
-        </div>
-        <button type="submit" style={{ width: '100%', padding: 10, marginTop: 10 }}>
-          Se connecter
-        </button>
-      </form>
-      <p style={{ marginTop: 16 }}>
-        Pas encore de compte ? <Link to="/register">S'inscrire</Link>
-      </p>
+    <div className="auth-shell">
+      <div className="auth-card">
+        <h1>Connexion</h1>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{ width: '100%', padding: 8, margin: '8px 0' }}
+            />
+          </div>
+          <div>
+            <label>Mot de passe</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{ width: '100%', padding: 8, margin: '8px 0' }}
+            />
+          </div>
+          <button type="submit" style={{ width: '100%', padding: 10, marginTop: 10 }}>
+            Se connecter
+          </button>
+        </form>
+        <p style={{ marginTop: 16 }}>
+          Pas encore de compte ? <Link to="/register">S'inscrire</Link>
+        </p>
+      </div>
     </div>
   );
 }

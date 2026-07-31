@@ -76,7 +76,7 @@ export default function Profile() {
   if (loading) return <div style={{ textAlign: 'center', padding: 50 }}>Chargement...</div>;
 
   return (
-    <div style={{ maxWidth: 700, margin: '50px auto', padding: 20 }}>
+    <div className="page-panel page-panel--medium">
       <BackButton to="/" label="← Accueil" />
       <h1 style={{ marginBottom: 'var(--space-lg)' }}>Mon profil</h1>
 
@@ -88,7 +88,7 @@ export default function Profile() {
           </p>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
+        <div className="responsive-grid-2">
           <Input label="Prénom" value={profile?.prenom || ''} onChange={(e) => updateField('prenom', e.target.value)} />
           <Input label="Nom" value={profile?.nom || ''} onChange={(e) => updateField('nom', e.target.value)} />
         </div>
@@ -100,7 +100,7 @@ export default function Profile() {
         <Input label="Téléphone" type="tel" value={profile?.telephone || ''} onChange={(e) => updateField('telephone', e.target.value)} placeholder="+229 XX XX XX XX" />
         <Input label="Adresse" value={profile?.adresse || ''} onChange={(e) => updateField('adresse', e.target.value)} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
+        <div className="responsive-grid-2">
           <Input label="Ville" value={profile?.ville || ''} onChange={(e) => updateField('ville', e.target.value)} />
           <Input label="Pays" value={profile?.pays || 'Bénin'} onChange={(e) => updateField('pays', e.target.value)} />
         </div>

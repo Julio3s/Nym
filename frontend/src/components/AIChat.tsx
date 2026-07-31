@@ -22,23 +22,25 @@ export default function AIChat() {
     if (!input.trim() || loading) return;
     const userMsg = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
     setLoading(true);
 
     try {
-      const historique = messages.map(m => ({ role: m.role, content: m.content }));
+      const historique = messages.map((m) => ({ role: m.role, content: m.content }));
       const res = await api.post('/chat/', { message: userMsg, historique });
       const data = res.data;
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
-      
-      // Si une action a été exécutée, proposer un rafraîchissement
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.response }]);
+
       if (data.action) {
         setTimeout(() => {
-          setMessages(prev => [...prev, { role: 'assistant', content: '🔄 Les données ont été mises à jour. Rafraîchissez la page pour voir les changements.' }]);
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: '🔄 Les données ont été mises à jour. Rafraîchissez la page pour voir les changements.' },
+          ]);
         }, 500);
       }
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue.' }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue.' }]);
     } finally {
       setLoading(false);
     }
@@ -53,35 +55,17 @@ export default function AIChat() {
 
   return (
     <>
-      {/* Bouton flottant */}
       <button
         onClick={() => setOpen(!open)}
-        style={{
-          position: 'fixed', bottom: 20, right: 20, zIndex: 1000,
-          width: 56, height: 56, borderRadius: '50%',
-          backgroundColor: 'var(--color-primary)',
-          color: 'white', border: 'none', cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-          fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
+        className="chat-toggle"
         title="Assistant IA"
+        aria-label="Assistant IA"
       >
         {open ? '✕' : '🤖'}
       </button>
 
-      {/* Fenêtre de chat */}
       {open && (
-        <div style={{
-          position: 'fixed', bottom: 84, right: 20, zIndex: 1000,
-          width: 360, height: 500,
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-          display: 'flex', flexDirection: 'column',
-          overflow: 'hidden',
-        }}>
-          {/* Header */}
+        <div className="chat-panel">
           <div style={{
             padding: 'var(--space-md)',
             backgroundColor: 'var(--color-primary)',
@@ -92,11 +76,13 @@ export default function AIChat() {
             🤖 Conseiller Financier IA
           </div>
 
-          {/* Messages */}
           <div style={{
-            flex: 1, overflowY: 'auto',
+            flex: 1,
+            overflowY: 'auto',
             padding: 'var(--space-md)',
-            display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-sm)',
           }}>
             {messages.length === 0 && (
               <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', marginTop: 40 }}>
@@ -104,17 +90,20 @@ export default function AIChat() {
               </p>
             )}
             {messages.map((msg, i) => (
-              <div key={i} style={{
-                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                maxWidth: '80%',
-                padding: '8px 12px',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: msg.role === 'user' ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
-                color: msg.role === 'user' ? 'white' : 'var(--color-text)',
-                fontSize: 'var(--font-size-sm)',
-                lineHeight: 1.4,
-                whiteSpace: 'pre-wrap',
-              }}>
+              <div
+                key={i}
+                style={{
+                  alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                  maxWidth: '80%',
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: msg.role === 'user' ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
+                  color: msg.role === 'user' ? 'white' : 'var(--color-text)',
+                  fontSize: 'var(--font-size-sm)',
+                  lineHeight: 1.4,
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
                 {msg.content}
               </div>
             ))}
@@ -133,11 +122,11 @@ export default function AIChat() {
             <div ref={endRef} />
           </div>
 
-          {/* Input */}
           <div style={{
             padding: 'var(--space-sm)',
             borderTop: '1px solid var(--color-border)',
-            display: 'flex', gap: 'var(--space-sm)',
+            display: 'flex',
+            gap: 'var(--space-sm)',
           }}>
             <input
               value={input}
@@ -147,6 +136,7 @@ export default function AIChat() {
               disabled={loading}
               style={{
                 flex: 1,
+                minWidth: 0,
                 padding: '8px 12px',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--color-border)',

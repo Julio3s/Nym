@@ -24,20 +24,10 @@ export default function Layout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--color-bg)' }}>
+    <div className="app-shell">
+      {sidebarOpen && <button className="app-overlay" onClick={() => setSidebarOpen(false)} aria-label="Fermer le menu" />}
       {/* Sidebar */}
-      <aside style={{
-        width: sidebarOpen ? '240px' : '72px',
-        backgroundColor: 'var(--color-surface)',
-        borderRight: '1px solid var(--color-border)',
-        transition: 'width var(--transition-base)',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'fixed',
-        height: '100vh',
-        zIndex: 100,
-        boxShadow: 'var(--shadow-sm)',
-      }}>
+      <aside className={`app-sidebar ${sidebarOpen ? 'app-sidebar--open' : ''}`}>
         {/* Logo */}
         <div style={{
           padding: '20px 16px',
@@ -64,6 +54,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => setSidebarOpen(false)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -169,13 +160,62 @@ export default function Layout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main style={{
-        marginLeft: sidebarOpen ? '240px' : '72px',
-        flex: 1,
-        transition: 'margin-left var(--transition-base)',
-        minHeight: '100vh',
-      }}>
-        <div className="fade-in" style={{ padding: '32px', maxWidth: 1200, margin: '0 auto' }}>
+      <main className={`app-content ${sidebarOpen ? 'app-content--expanded' : ''}`}>
+        <div className="app-sidebar__mobilebar" style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 80,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          padding: '12px 16px',
+          backgroundColor: 'var(--color-surface)',
+          borderBottom: '1px solid var(--color-border)',
+        }}>
+          <button
+            onClick={() => setSidebarOpen((open) => !open)}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border)',
+              backgroundColor: 'var(--color-surface)',
+              color: 'var(--color-text)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 20,
+            }}
+            aria-label="Ouvrir le menu"
+          >
+            ☰
+          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+            <strong style={{ fontSize: 'var(--font-size-base)', lineHeight: 1.2 }}>Mny</strong>
+            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              {user?.prenom || user?.username || user?.email}
+            </span>
+          </div>
+          <button
+            onClick={toggleTheme}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border)',
+              backgroundColor: 'var(--color-surface)',
+              color: 'var(--color-text)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 18,
+            }}
+            aria-label="Changer le thème"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
+        <div className="fade-in app-page">
           {children}
         </div>
       </main>

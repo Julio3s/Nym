@@ -23,12 +23,8 @@ export default function RevenueList() {
       setRevenues(data.results);
       setTotal(data.count);
 
-      // Calculer le total des revenus
-      let allTotal = 0;
       const allData = await expenseService.list({ type: 'revenu', page: 1, ordering: '-date' });
-      if (allData.results) {
-        allTotal = allData.results.reduce((sum: number, r: Expense) => sum + parseFloat(String(r.montant)), 0);
-      }
+      const allTotal = allData.results?.reduce((sum: number, r: Expense) => sum + parseFloat(String(r.montant)), 0) ?? 0;
       setTotalRevenus(allTotal);
     } catch (err) {
       console.error(err);
@@ -49,19 +45,21 @@ export default function RevenueList() {
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: '30px auto', padding: 20 }}>
+    <div className="page-panel page-panel--wide">
       <BackButton to="/" label="← Accueil" />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+      <div className="page-header-row">
         <div>
           <h1>Mes revenus</h1>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
             Total : <strong style={{ color: 'var(--color-success)' }}>{formatXOF(totalRevenus)}</strong>
           </p>
         </div>
-        <Link to="/revenues/new">
-          <Button>+ Ajouter un revenu</Button>
-        </Link>
+        <div className="page-header-actions">
+          <Link to="/revenues/new">
+            <Button>+ Ajouter un revenu</Button>
+          </Link>
+        </div>
       </div>
 
       {loading ? (
@@ -73,12 +71,12 @@ export default function RevenueList() {
           </p>
         </Card>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+        <div className="stack-list">
           {revenues.map((rev) => (
             <Card key={rev.id} padding="var(--space-md)">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)' }}>
+              <div className="card-row">
+                <div className="expense-meta">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)', flexWrap: 'wrap' }}>
                     <CategoryChip category={rev.categorie} />
                     <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>
                       {new Date(rev.date).toLocaleDateString('fr-FR')}
@@ -94,7 +92,7 @@ export default function RevenueList() {
                   <p style={{ fontWeight: 700, fontSize: 'var(--font-size-lg)', color: 'var(--color-success)' }}>
                     +{formatXOF(parseFloat(String(rev.montant)))}
                   </p>
-                  <div style={{ display: 'flex', gap: 'var(--space-xs)', marginTop: 'var(--space-xs)' }}>
+                  <div className="card-actions" style={{ marginTop: 'var(--space-xs)' }}>
                     <Link to={`/expenses/${rev.id}/edit`}>
                       <Button variant="ghost" size="sm">Modifier</Button>
                     </Link>
@@ -110,7 +108,7 @@ export default function RevenueList() {
       )}
 
       {total > 20 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-md)', marginTop: 'var(--space-lg)', flexWrap: 'wrap' }}>
           <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Précédent</Button>
           <span style={{ display: 'flex', alignItems: 'center', color: 'var(--color-text-secondary)' }}>Page {page}</span>
           <Button variant="secondary" disabled={page * 20 >= total} onClick={() => setPage(p => p + 1)}>Suivant</Button>
