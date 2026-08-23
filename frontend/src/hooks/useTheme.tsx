@@ -28,7 +28,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {
-      // Stockage indisponible (mode privé…) : on garde le thème en mémoire.
+      // Stockage indisponible : on garde le thème en mémoire.
     }
   }, [theme]);
 

@@ -4,6 +4,7 @@ export interface Summary {
   today: { depenses: number; revenus: number; count: number };
   month: { depenses: number; revenus: number; count: number };
   solde: number;
+  totaux: { depenses: number; revenus: number };
 }
 
 export interface CategoryData {

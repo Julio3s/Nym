@@ -12,7 +12,7 @@ export interface RevenueSource {
 export const revenueService = {
   async getRevenueSources(): Promise<RevenueSource[]> {
     const res = await api.get('/revenue-sources/');
-    return res.data;
+    return res.data.results ?? res.data;
   },
 
   async createRevenueSource(data: { name: string; default_amount?: number | null; description?: string }): Promise<RevenueSource> {

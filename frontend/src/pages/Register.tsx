@@ -1,6 +1,35 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+
+function formatRegistrationError(error: unknown): string {
+  if (!axios.isAxiosError(error) || !error.response?.data) {
+    return "Impossible de joindre le serveur. Réessaie dans un instant.";
+  }
+
+  const data = error.response.data;
+  if (typeof data.detail === 'string') return data.detail;
+
+  if (typeof data === 'object') {
+    const messages = Object.entries(data)
+      .flatMap(([field, value]) => {
+        const label = field === 'username'
+          ? "Nom d'utilisateur"
+          : field === 'email'
+            ? 'Email'
+            : field === 'password'
+              ? 'Mot de passe'
+              : field;
+        const details = Array.isArray(value) ? value.join(' ') : String(value);
+        return details ? [`${label} : ${details}`] : [];
+      });
+
+    if (messages.length) return messages.join(' ');
+  }
+
+  return "L'inscription a échoué. Vérifie les informations saisies.";
+}
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -16,8 +45,8 @@ export default function Register() {
     try {
       await register(username, email, password);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Erreur lors de l'inscription");
+    } catch (err: unknown) {
+      setError(formatRegistrationError(err));
     }
   };
 

@@ -11,7 +11,7 @@ export const categoryService = {
   async getCategories(type?: 'depense' | 'revenu'): Promise<Category[]> {
     const params = type ? { type } : {};
     const res = await api.get('/categories/', { params });
-    return res.data;
+    return res.data.results ?? res.data;
   },
 
   async createCategory(data: { name: string; type: 'depense' | 'revenu' }): Promise<Category> {
