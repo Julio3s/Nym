@@ -5,16 +5,15 @@ import Button from '../components/Button';
 import CategoryChip from '../components/CategoryChip';
 import BackButton from '../components/BackButton';
 import { expenseService, type Expense } from '../services/expenseService';
-
-const CATEGORIES = [
-  'alimentation', 'transport', 'logement', 'loisirs',
-  'sante', 'education', 'shopping', 'autres',
-];
+import { categoryService, type Category } from '../services/categoryService';
+import api from '../services/api';
 
 export default function ExpenseList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
 
@@ -24,6 +23,7 @@ export default function ExpenseList() {
 
   const fetchExpenses = async () => {
     setLoading(true);
+    setError('');
     try {
       const params: any = { page };
       if (typeFilter) params.type = typeFilter;
@@ -34,6 +34,7 @@ export default function ExpenseList() {
       setTotal(data.count);
     } catch (err) {
       console.error(err);
+      setError('Impossible de charger les transactions.');
     } finally {
       setLoading(false);
     }
@@ -42,6 +43,34 @@ export default function ExpenseList() {
   useEffect(() => {
     fetchExpenses();
   }, [page, typeFilter, categorieFilter, searchQuery]);
+
+  // Catégories réelles de l'utilisateur pour les filtres (dépenses)
+  useEffect(() => {
+    categoryService.getCategories('depense')
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
+
+  const handleExport = async () => {
+    try {
+      const params: Record<string, string> = {};
+      if (typeFilter) params.type = typeFilter;
+      if (categorieFilter) params.categorie = categorieFilter;
+      if (searchQuery) params.search = searchQuery;
+      const res = await api.get('/expenses/export/', { params, responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'transactions.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      setError("Impossible d'exporter les transactions.");
+    }
+  };
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Supprimer cette transaction ?')) {
@@ -78,8 +107,15 @@ export default function ExpenseList() {
           <Link to="/revenues/new">
             <Button variant="secondary">+ Revenu</Button>
           </Link>
+          <Button variant="ghost" onClick={handleExport}>📥 Exporter CSV</Button>
         </div>
       </div>
+
+      {error && (
+        <p style={{ color: 'var(--color-danger)', marginBottom: 'var(--space-md)' }}>
+          {error}
+        </p>
+      )}
 
       <Card style={{ marginBottom: 'var(--space-lg)' }}>
         <div style={{ marginBottom: 'var(--space-md)' }}>
@@ -105,12 +141,12 @@ export default function ExpenseList() {
         </div>
 
         <div className="filter-row filter-row--chips">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <CategoryChip
-              key={cat}
-              category={cat}
-              selected={categorieFilter === cat}
-              onClick={() => setFilter('categorie', categorieFilter === cat ? '' : cat)}
+              key={cat.id}
+              category={cat.name}
+              selected={categorieFilter === cat.name}
+              onClick={() => setFilter('categorie', categorieFilter === cat.name ? '' : cat.name)}
             />
           ))}
           {categorieFilter && (
@@ -146,7 +182,7 @@ export default function ExpenseList() {
                     }}>
                       {expense.type === 'revenu' ? 'R' : 'D'}
                     </span>
-                    <CategoryChip category={expense.categorie} />
+                    <CategoryChip category={expense.category_name || expense.categorie} />
                     <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>
                       {new Date(expense.date).toLocaleDateString('fr-FR')}
                     </span>

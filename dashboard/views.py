@@ -1,8 +1,8 @@
 from django.db.models import Sum, Count
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, Coalesce
 from django.utils import timezone
 from datetime import timedelta, date
-import json, re
+import re
 import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -74,21 +74,31 @@ Réponds en français, max 150 mots, sois amical et concret."""
         except Exception as e:
             return Response({'response': f"Erreur: {str(e)}", 'action': None}, status=500)
 
+    def _resolve_category(self, user, name, type_):
+        """Retourne (category, nom_nettoyé) — crée la catégorie si besoin."""
+        name = (name or '').strip()
+        if not name:
+            return None, ''
+        category, _ = Category.objects.get_or_create(
+            user=user, name=name, type=type_,
+            defaults={'name': name, 'type': type_},
+        )
+        return category, category.name
+
     def _detect_action(self, msg, user):
         """Détecte les actions par mots-clés et les exécute."""
         msg_lower = msg.lower()
         today = date.today()
 
         # --- CRÉER BUDGET ---
-        if 'budget' in msg_lower and ('crée' in msg_lower or 'creer' in msg_lower or 'ajoute' in msg_lower or 'fixe' in msg_lower or 'met' in msg_lower or 'nouveau' in msg_lower):
-            categories = [c.name for c in Category.objects.filter(user=user, type='depense')]
+        if 'budget' in msg_lower and any(
+            kw in msg_lower
+            for kw in ('crée', 'creer', 'ajoute', 'fixe', 'met', 'nouveau', 'budget de')
+        ):
+            categories = list(Category.objects.filter(user=user, type='depense').values_list('name', flat=True))
             if not categories:
                 categories = ['alimentation', 'transport', 'logement', 'loisirs', 'sante', 'education', 'shopping', 'autres']
-            categorie = None
-            for cat in categories:
-                if cat.lower() in msg_lower:
-                    categorie = cat
-                    break
+            categorie = next((cat for cat in categories if cat.lower() in msg_lower), None)
             if not categorie:
                 return None
 
@@ -106,7 +116,7 @@ Réponds en français, max 150 mots, sois amical et concret."""
                 existing = Budget.objects.filter(user=user, categorie=categorie, mois=mois).first()
                 if existing:
                     existing.montant = montant
-                    existing.save()
+                    existing.save(update_fields=['montant'])
                 else:
                     Budget.objects.create(user=user, categorie=categorie, montant=montant, mois=mois)
                 return Response({
@@ -120,16 +130,16 @@ Réponds en français, max 150 mots, sois amical et concret."""
                 })
 
         # --- AJOUTER DÉPENSE ---
-        if 'dépense' in msg_lower or 'depense' in msg_lower or 'dépensé' in msg_lower or 'acheté' in msg_lower or 'payé' in msg_lower:
+        if 'dépense' in msg_lower or 'depense' in msg_lower or 'dépensé' in msg_lower or 'acheté' in msg_lower or 'payé' in msg_lower or 'payer' in msg_lower:
             montants = re.findall(r'(\d+[\s]?\d*)', msg_lower)
             montant = None
             for m in montants:
                 val = float(m.replace(' ', ''))
-                if val > 0 and val < 100000000:
+                if 0 < val < 100000000:
                     montant = val
                     break
 
-            categories = [c.name for c in Category.objects.filter(user=user, type='depense')]
+            categories = list(Category.objects.filter(user=user, type='depense').values_list('name', flat=True))
             if not categories:
                 categories = ['alimentation', 'transport', 'logement', 'loisirs', 'sante', 'education', 'shopping', 'autres']
             categorie = 'autres'
@@ -139,12 +149,13 @@ Réponds en français, max 150 mots, sois amical et concret."""
                     break
 
             if montant:
+                category, cat_name = self._resolve_category(user, categorie, 'depense')
                 expense = Expense.objects.create(
                     user=user, type='depense', montant=montant,
-                    categorie=categorie, description=msg, date=today
+                    category=category, categorie=cat_name, description=msg, date=today
                 )
                 return Response({
-                    'response': f"✅ Dépense de {montant:,.0f} FCFA en '{categorie}' ajoutée !",
+                    'response': f"✅ Dépense de {montant:,.0f} FCFA en '{cat_name}' ajoutée !",
                     'action': {'type': 'expense_created', 'id': expense.id}
                 })
 
@@ -154,11 +165,11 @@ Réponds en français, max 150 mots, sois amical et concret."""
             montant = None
             for m in montants:
                 val = float(m.replace(' ', ''))
-                if val > 0 and val < 100000000:
+                if 0 < val < 100000000:
                     montant = val
                     break
 
-            revenue_sources = [rs.name for rs in RevenueSource.objects.filter(user=user, is_active=True)]
+            revenue_sources = list(RevenueSource.objects.filter(user=user, is_active=True).values_list('name', flat=True))
             if not revenue_sources:
                 revenue_sources = ['salaire', 'freelance', 'investissement', 'vente', 'autres']
             source = 'autres'
@@ -171,23 +182,35 @@ Réponds en français, max 150 mots, sois amical et concret."""
                 source = 'salaire'
 
             if montant:
+                category, cat_name = self._resolve_category(user, source, 'revenu')
                 revenue = Expense.objects.create(
                     user=user, type='revenu', montant=montant,
-                    categorie=source, description=msg, date=today
+                    category=category, categorie=cat_name, description=msg, date=today
                 )
                 return Response({
-                    'response': f"✅ Revenu de {montant:,.0f} FCFA en '{source}' ajouté !",
+                    'response': f"✅ Revenu de {montant:,.0f} FCFA en '{cat_name}' ajouté !",
                     'action': {'type': 'revenue_created', 'id': revenue.id}
                 })
 
         return None
 
 
+def _parse_month(day):
+    """(début, fin) du mois contenant `day` (ou `day` ramené au 1er du mois)."""
+    start = day.replace(day=1)
+    if start.month == 12:
+        end = start.replace(year=start.year + 1, month=1)
+    else:
+        end = start.replace(month=start.month + 1)
+    return start, end
+
+
 class SummaryView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         today = timezone.now().date()
-        start_of_month = today.replace(day=1)
+        start_of_month, _ = _parse_month(today)
         d_today = Expense.objects.filter(user=request.user, date=today, type='depense').aggregate(total=Sum('montant'), count=Count('id'))
         r_today = Expense.objects.filter(user=request.user, date=today, type='revenu').aggregate(total=Sum('montant'), count=Count('id'))
         d_month = Expense.objects.filter(user=request.user, date__gte=start_of_month, type='depense').aggregate(total=Sum('montant'), count=Count('id'))
@@ -198,27 +221,65 @@ class SummaryView(APIView):
             'today': {'depenses': float(d_today['total'] or 0), 'revenus': float(r_today['total'] or 0), 'count': (d_today['count'] or 0) + (r_today['count'] or 0)},
             'month': {'depenses': float(d_month['total'] or 0), 'revenus': float(r_month['total'] or 0), 'count': (d_month['count'] or 0) + (r_month['count'] or 0)},
             'solde': total_r - total_d,
+            'totaux': {'depenses': total_d, 'revenus': total_r},
         })
+
 
 class ByCategoryView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         today = timezone.now().date()
-        start = today.replace(day=1)
+        start, _ = _parse_month(today)
         m = request.query_params.get('mois')
         if m:
             try:
-                y, mo = map(int, m.split('-')); start = today.replace(year=y, month=mo, day=1)
-            except: pass
-        end = start.replace(month=start.month + 1) if start.month < 12 else start.replace(year=start.year + 1, month=1)
-        cats = Expense.objects.filter(user=request.user, date__gte=start, date__lt=end).values('categorie').annotate(total=Sum('montant'), count=Count('id')).order_by('-total')
-        return Response({'mois': start.strftime('%Y-%m'), 'categories': [{'categorie': c['categorie'], 'total': float(c['total']), 'count': c['count']} for c in cats]})
+                y, mo = map(int, m.split('-'))
+                start = today.replace(year=y, month=mo, day=1)
+            except (ValueError, TypeError):
+                pass
+        start, end = _parse_month(start)
+        type_ = request.query_params.get('type', 'depense')
+        qs = Expense.objects.filter(user=request.user, date__gte=start, date__lt=end)
+        if type_ in ('depense', 'revenu'):
+            qs = qs.filter(type=type_)
+        cats = (
+            qs.annotate(cat_name=Coalesce('category__name', 'categorie'))
+            .values('cat_name')
+            .annotate(total=Sum('montant'), count=Count('id'))
+            .order_by('-total')
+        )
+        return Response({
+            'mois': start.strftime('%Y-%m'),
+            'type': type_ if type_ in ('depense', 'revenu') else None,
+            'categories': [
+                {'categorie': c['cat_name'] or 'Sans catégorie', 'total': float(c['total']), 'count': c['count']}
+                for c in cats
+            ],
+        })
+
 
 class TimelineView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         today = timezone.now().date()
-        months = int(request.query_params.get('months', 6))
+        try:
+            months = min(max(int(request.query_params.get('months', 6)), 1), 24)
+        except (TypeError, ValueError):
+            months = 6
         start = today - timedelta(days=30 * months)
-        tl = Expense.objects.filter(user=request.user, date__gte=start).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('montant'), count=Count('id')).order_by('month')
-        return Response([{'mois': e['month'].strftime('%Y-%m') if e['month'] else None, 'total': float(e['total']), 'count': e['count']} for e in tl])
+        qs = Expense.objects.filter(user=request.user, date__gte=start)
+        type_ = request.query_params.get('type', 'depense')
+        if type_ in ('depense', 'revenu'):
+            qs = qs.filter(type=type_)
+        tl = (
+            qs.annotate(month=TruncMonth('date'))
+            .values('month')
+            .annotate(total=Sum('montant'), count=Count('id'))
+            .order_by('month')
+        )
+        return Response([
+            {'mois': e['month'].strftime('%Y-%m') if e['month'] else None, 'total': float(e['total']), 'count': e['count']}
+            for e in tl
+        ])

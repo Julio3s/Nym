@@ -32,3 +32,4 @@ class UserSerializer(serializers.ModelSerializer):
             'nom', 'prenom', 'date_naissance', 'telephone',
             'adresse', 'ville', 'pays',
         )
+        read_only_fields = ('id', 'date_joined')

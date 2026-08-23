@@ -3,6 +3,7 @@ import Input from './Input';
 import Button from './Button';
 import type { ExpenseFormData } from '../services/expenseService';
 import { categoryService, type Category } from '../services/categoryService';
+import { revenueService, type RevenueSource } from '../services/revenueService';
 
 interface ExpenseFormProps {
   initialData?: ExpenseFormData;
@@ -14,10 +15,12 @@ interface ExpenseFormProps {
 export default function ExpenseForm({ initialData, onSubmit, loading, mode = 'depense' }: ExpenseFormProps) {
   const [montant, setMontant] = useState(initialData?.montant?.toString() || '');
   const [categorie, setCategorie] = useState(initialData?.categorie || '');
+  const [revenueSourceId, setRevenueSourceId] = useState<number | null>(initialData?.revenue_source ?? null);
   const [description, setDescription] = useState(initialData?.description || '');
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
   const [error, setError] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [revenueSources, setRevenueSources] = useState<RevenueSource[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [showNewCategory, setShowNewCategory] = useState(false);
 
@@ -35,6 +38,14 @@ export default function ExpenseForm({ initialData, onSubmit, loading, mode = 'de
     };
     loadCategories();
   }, [mode, initialData?.categorie]);
+
+  // Sources de revenu (affichées uniquement en mode revenu)
+  useEffect(() => {
+    if (mode !== 'revenu') return;
+    revenueService.getRevenueSources()
+      .then(setRevenueSources)
+      .catch(() => {});
+  }, [mode]);
 
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return;
@@ -60,9 +71,22 @@ export default function ExpenseForm({ initialData, onSubmit, loading, mode = 'de
     }
 
     try {
-      await onSubmit({ type: mode, montant: montantNum, categorie, description, date });
-    } catch {
-      setError("Erreur lors de l'enregistrement");
+      await onSubmit({
+        type: mode,
+        montant: montantNum,
+        categorie,
+        revenue_source: mode === 'revenu' ? revenueSourceId : null,
+        description,
+        date,
+      });
+    } catch (err: any) {
+      const detail = err?.response?.data;
+      if (detail && typeof detail === 'object' && !Array.isArray(detail)) {
+        const firstError = Object.values(detail)[0];
+        setError(String(Array.isArray(firstError) ? firstError[0] : firstError));
+      } else {
+        setError("Erreur lors de l'enregistrement");
+      }
     }
   };
 
@@ -83,6 +107,35 @@ export default function ExpenseForm({ initialData, onSubmit, loading, mode = 'de
         onChange={(e) => setMontant(e.target.value)}
         required
       />
+
+      {mode === 'revenu' && revenueSources.length > 0 && (
+        <div style={{ marginBottom: 'var(--space-md)' }}>
+          <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 500, color: 'var(--color-text-secondary)' }}>
+            Source de revenu
+          </label>
+          <select
+            value={revenueSourceId ?? ''}
+            onChange={(e) => setRevenueSourceId(e.target.value ? parseInt(e.target.value, 10) : null)}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border)',
+              backgroundColor: 'var(--color-bg-secondary)',
+              color: 'var(--color-text)',
+              fontSize: 'var(--font-size-base)',
+            }}
+          >
+            <option value="">— Aucune source —</option>
+            {revenueSources.map((rs) => (
+              <option key={rs.id} value={rs.id}>{rs.name}</option>
+            ))}
+          </select>
+          <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginTop: 'var(--space-xs)' }}>
+            Gérez vos sources dans « Sources de revenus ».
+          </p>
+        </div>
+      )}
 
       <div style={{ marginBottom: 'var(--space-md)' }}>
         <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 500, color: 'var(--color-text-secondary)' }}>

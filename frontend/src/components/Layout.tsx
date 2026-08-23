@@ -1,6 +1,7 @@
 import { type CSSProperties, type ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../hooks/useTheme';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: '📊' },
@@ -30,6 +31,7 @@ type Sticker = typeof fallingStickers[number];
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -96,7 +98,29 @@ export default function Layout({ children }: { children: ReactNode }) {
             >
               M
             </div>
-            {sidebarOpen && <span style={{ fontWeight: 700, fontSize: 'var(--font-size-lg)' }}>Mny</span>}
+            {sidebarOpen && <span style={{ fontWeight: 700, fontSize: 'var(--font-size-lg)', flex: 1 }}>Mny</span>}
+            {!sidebarOpen && <span style={{ flex: 1 }} />}
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+              aria-label="Changer de thème"
+              style={{
+                marginLeft: 'auto',
+                width: 34,
+                height: 34,
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 16,
+                flexShrink: 0,
+              }}
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
           </div>
 
           <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>

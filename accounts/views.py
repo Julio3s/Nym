@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from .serializers import RegisterSerializer, UserSerializer
 from .models import User
 
@@ -52,17 +53,24 @@ class UpdateProfileView(generics.UpdateAPIView):
 
 
 class ChangePasswordView(APIView):
-    """Changement de mot de passe."""
+    """Changement de mot de passe (avec validation forte Django)."""
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         user = request.user
         old_password = request.data.get('old_password')
         new_password = request.data.get('new_password')
+        new_password2 = request.data.get('new_password2')
 
         if not old_password or not new_password:
             return Response(
                 {'detail': 'Ancien et nouveau mot de passe requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if new_password2 is not None and new_password != new_password2:
+            return Response(
+                {'detail': 'Les deux nouveaux mots de passe ne correspondent pas.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -72,14 +80,16 @@ class ChangePasswordView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if len(new_password) < 8:
+        # Applique les validateurs Django (longueur, similarité, listes communes…)
+        try:
+            validate_password(new_password, user=user)
+        except ValidationError as errors:
             return Response(
-                {'detail': 'Le mot de passe doit contenir au moins 8 caractères.'},
+                {'detail': ' '.join(errors.messages)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         user.set_password(new_password)
-        user.save()
-        update_session_auth_hash(request, user)
+        user.save(update_fields=['password'])
 
         return Response({'detail': 'Mot de passe modifié avec succès.'})

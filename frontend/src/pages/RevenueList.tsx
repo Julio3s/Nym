@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import CategoryChip from '../components/CategoryChip';
 import BackButton from '../components/BackButton';
 import { expenseService, type Expense } from '../services/expenseService';
+import { dashboardService } from '../services/dashboardService';
 
 const formatXOF = (value: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(value);
@@ -19,13 +20,13 @@ export default function RevenueList() {
   const fetchRevenues = async () => {
     setLoading(true);
     try {
-      const data = await expenseService.list({ type: 'revenu', page, ordering: '-date' });
+      const [data, summary] = await Promise.all([
+        expenseService.list({ type: 'revenu', page, ordering: '-date' }),
+        dashboardService.getSummary(),
+      ]);
       setRevenues(data.results);
       setTotal(data.count);
-
-      const allData = await expenseService.list({ type: 'revenu', page: 1, ordering: '-date' });
-      const allTotal = allData.results?.reduce((sum: number, r: Expense) => sum + parseFloat(String(r.montant)), 0) ?? 0;
-      setTotalRevenus(allTotal);
+      setTotalRevenus(summary.totaux?.revenus ?? 0);
     } catch (err) {
       console.error(err);
     } finally {

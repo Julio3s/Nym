@@ -3,7 +3,12 @@ from django.conf import settings
 
 
 class Budget(models.Model):
-    """Modèle de budget par catégorie et par mois."""
+    """Modèle de budget par catégorie et par mois.
+
+    `categorie` stocke le *nom* de la catégorie (custom ou par défaut). Aucune
+    liste figée : l'utilisateur peut budgéter n'importe laquelle de ses
+    catégories personnalisées.
+    """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -11,17 +16,7 @@ class Budget(models.Model):
         verbose_name='Utilisateur',
     )
     categorie = models.CharField(
-        max_length=20,
-        choices=[
-            ('alimentation', 'Alimentation'),
-            ('transport', 'Transport'),
-            ('logement', 'Logement'),
-            ('loisirs', 'Loisirs'),
-            ('sante', 'Santé'),
-            ('education', 'Éducation'),
-            ('shopping', 'Shopping'),
-            ('autres', 'Autres'),
-        ],
+        max_length=50,
         verbose_name='Catégorie',
     )
     montant = models.DecimalField(

@@ -81,7 +81,7 @@ export default function Dashboard() {
       <div className="dashboard-charts-grid">
         {/* Pie */}
         <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
-          <h3 style={{ marginBottom: '20px', fontSize: 'var(--font-size-lg)' }}>Répartition par catégorie</h3>
+          <h3 style={{ marginBottom: '20px', fontSize: 'var(--font-size-lg)' }}>Répartition des dépenses par catégorie</h3>
           {loading ? <p style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>Chargement...</p> :
            categories.length === 0 ? <p style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>Aucune dépense ce mois</p> :
            <ResponsiveContainer width="100%" height={280}>
@@ -97,7 +97,7 @@ export default function Dashboard() {
 
         {/* Line */}
         <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
-          <h3 style={{ marginBottom: '20px', fontSize: 'var(--font-size-lg)' }}>Évolution mensuelle</h3>
+          <h3 style={{ marginBottom: '20px', fontSize: 'var(--font-size-lg)' }}>Évolution mensuelle des dépenses</h3>
           {loading ? <p style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>Chargement...</p> :
            timeline.length === 0 ? <p style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>Aucune donnée</p> :
            <ResponsiveContainer width="100%" height={280}>

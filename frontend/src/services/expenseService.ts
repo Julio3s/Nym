@@ -4,7 +4,11 @@ export interface Expense {
   id: number;
   type: 'depense' | 'revenu';
   montant: string;
+  category: number | null;
   categorie: string;
+  category_name?: string | null;
+  revenue_source?: number | null;
+  revenue_source_name?: string | null;
   description: string;
   date: string;
   created_at: string;
@@ -14,6 +18,7 @@ export interface ExpenseFormData {
   type?: 'depense' | 'revenu';
   montant: number;
   categorie: string;
+  revenue_source?: number | null;
   description: string;
   date: string;
 }

@@ -8,13 +8,20 @@ import { expenseService, type ExpenseFormData } from '../services/expenseService
 export default function ExpenseEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [initialData, setInitialData] = useState<ExpenseFormData | undefined>(undefined);
+  const [initialData, setInitialData] = useState<(ExpenseFormData & { type: 'depense' | 'revenu' }) | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (id) {
       expenseService.get(parseInt(id)).then((data) => {
-        setInitialData({ ...data, montant: parseFloat(data.montant) });
+        setInitialData({
+          type: data.type,
+          montant: parseFloat(data.montant),
+          categorie: data.category_name || data.categorie,
+          revenue_source: data.revenue_source ?? null,
+          description: data.description,
+          date: data.date,
+        });
         setLoading(false);
       }).catch(() => {
         navigate('/expenses');
@@ -34,9 +41,9 @@ export default function ExpenseEdit() {
   return (
     <div className="page-panel page-panel--narrow">
       <BackButton to="/expenses" label="← Liste des dépenses" />
-      <h1 style={{ marginBottom: 'var(--space-lg)' }}>Modifier la dépense</h1>
+      <h1 style={{ marginBottom: 'var(--space-lg)' }}>Modifier la transaction</h1>
       <Card>
-        <ExpenseForm initialData={initialData} onSubmit={handleSubmit} />
+        <ExpenseForm initialData={initialData} mode={initialData?.type} onSubmit={handleSubmit} />
       </Card>
     </div>
   );

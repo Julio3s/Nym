@@ -24,14 +24,18 @@ export const dashboardService = {
     return res.data as Summary;
   },
 
-  async getByCategory(mois?: string) {
-    const params = mois ? { mois } : {};
+  async getByCategory(mois?: string, type?: 'depense' | 'revenu') {
+    const params: Record<string, string> = {};
+    if (mois) params.mois = mois;
+    if (type) params.type = type;
     const res = await api.get('/dashboard/by-category/', { params });
-    return res.data as { mois: string; categories: CategoryData[] };
+    return res.data as { mois: string; type: string | null; categories: CategoryData[] };
   },
 
-  async getTimeline(months: number = 6) {
-    const res = await api.get('/dashboard/timeline/', { params: { months } });
+  async getTimeline(months: number = 6, type?: 'depense' | 'revenu') {
+    const params: Record<string, string | number> = { months };
+    if (type) params.type = type;
+    const res = await api.get('/dashboard/timeline/', { params });
     return res.data as TimelineEntry[];
   },
 };

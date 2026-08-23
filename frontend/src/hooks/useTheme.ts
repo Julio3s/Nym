@@ -1,21 +1,48 @@
-import { useEffect } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 
-type Theme = 'dark';
+type Theme = 'light' | 'dark';
 
-export function useTheme() {
+interface ThemeContextType {
+  theme: Theme;
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+const STORAGE_KEY = 'theme';
+
+function getInitialTheme(): Theme {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === 'light' ? 'light' : 'dark';
+  } catch {
+    return 'dark';
+  }
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.documentElement.style.colorScheme = 'dark';
-
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = theme;
     try {
-      localStorage.setItem('theme', 'dark');
+      localStorage.setItem(STORAGE_KEY, theme);
     } catch {
-      // Local storage can be unavailable in restrictive browser modes.
+      // Stockage indisponible (mode privé…) : on garde le thème en mémoire.
     }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
   }, []);
 
-  return {
-    theme: 'dark' as Theme,
-    toggleTheme: () => {},
-  };
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme doit être utilisé dans un ThemeProvider');
+  }
+  return context;
 }

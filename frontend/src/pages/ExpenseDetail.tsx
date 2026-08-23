@@ -45,7 +45,7 @@ export default function ExpenseDetail() {
       <Card>
         <div className="card-row card-row--top" style={{ marginBottom: 'var(--space-lg)' }}>
           <div>
-            <CategoryChip category={expense.categorie} />
+            <CategoryChip category={expense.category_name || expense.categorie} />
             <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)', marginTop: 'var(--space-sm)' }}>
               {new Date(expense.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>

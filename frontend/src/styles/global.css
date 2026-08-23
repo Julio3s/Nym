@@ -15,7 +15,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
   width: 100%;
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 body {

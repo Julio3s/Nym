@@ -14,8 +14,8 @@ export function useDashboard() {
     try {
       const [summaryData, categoryData, timelineData] = await Promise.all([
         dashboardService.getSummary(),
-        dashboardService.getByCategory(),
-        dashboardService.getTimeline(),
+        dashboardService.getByCategory(undefined, 'depense'),
+        dashboardService.getTimeline(6, 'depense'),
       ]);
       setSummary(summaryData);
       setCategories(categoryData.categories);
