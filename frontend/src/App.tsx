@@ -5,6 +5,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import ExpenseList from './pages/ExpenseList';
 import ExpenseNew from './pages/ExpenseNew';
@@ -25,7 +26,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
+            <Route path="/" element={<PrivateRoute><Layout><Home /></Layout></PrivateRoute>} />
+            <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
             <Route path="/expenses" element={<PrivateRoute><Layout><ExpenseList /></Layout></PrivateRoute>} />
             <Route path="/expenses/new" element={<PrivateRoute><Layout><ExpenseNew /></Layout></PrivateRoute>} />
             <Route path="/expenses/:id" element={<PrivateRoute><Layout><ExpenseDetail /></Layout></PrivateRoute>} />
