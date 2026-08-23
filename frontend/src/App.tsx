@@ -16,7 +16,6 @@ import Profile from './pages/Profile';
 import RevenueNew from './pages/RevenueNew';
 import RevenueList from './pages/RevenueList';
 import RevenueSources from './pages/RevenueSources';
-import AIChat from './components/AIChat';
 
 function App() {
   return (
@@ -38,7 +37,6 @@ function App() {
             <Route path="/revenue-sources" element={<PrivateRoute><Layout><RevenueSources /></Layout></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Layout><Profile /></Layout></PrivateRoute>} />
           </Routes>
-          <AIChat />
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
