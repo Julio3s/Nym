@@ -1,39 +1,78 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { dashboardService, type Summary } from '../services/dashboardService';
+import { expenseService, type Expense } from '../services/expenseService';
 
-const actions = [
-  { to: '/expenses/new', title: 'Ajouter une dépense', text: 'Enregistre un achat ou une sortie.', icon: '−', tone: 'home-action--expense' },
-  { to: '/revenues/new', title: 'Ajouter un revenu', text: 'Ajoute un salaire, une vente ou un gain.', icon: '+', tone: 'home-action--income' },
-  { to: '/expenses', title: 'Mes transactions', text: 'Consulte, recherche ou exporte tes opérations.', icon: '≡', tone: 'home-action--transactions' },
-  { to: '/budgets', title: 'Mes budgets', text: 'Définis tes limites pour le mois.', icon: '◎', tone: 'home-action--budget' },
-];
+const formatXOF = (value: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(value);
+const isoToday = () => new Date().toISOString().slice(0, 10);
+const isoMonthStart = () => `${new Date().toISOString().slice(0, 7)}-01`;
 
 export default function Home() {
-  const { user } = useAuth();
-  const name = user?.prenom || user?.username || 'toi';
+  const [startDate, setStartDate] = useState(isoMonthStart);
+  const [endDate, setEndDate] = useState(isoToday);
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [transactions, setTransactions] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    Promise.all([
+      dashboardService.getSummary({ date_debut: startDate, date_fin: endDate }),
+      expenseService.list({ date_debut: startDate, date_fin: endDate, page: 1, ordering: '-date' }),
+    ])
+      .then(([summaryData, transactionsData]) => {
+        if (!active) return;
+        setSummary(summaryData);
+        setTransactions(transactionsData.results);
+      })
+      .catch(() => active && setError('Impossible de charger cet historique.'))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, [startDate, endDate]);
+
+  const period = summary?.period;
   return (
-    <section className="home-page">
-      <div className="home-hero">
-        <p className="home-kicker">Mny · tes finances au quotidien</p>
-        <h1>Bonjour, {name}.</h1>
-        <p>Que veux-tu faire aujourd’hui ?</p>
+    <section className="home-page home-page--balance">
+      <div className="balance-header">
+        <div>
+          <p className="home-kicker">Vue d’ensemble</p>
+          <h1>Mon solde</h1>
+          <p>Suivi de tes entrées et sorties d’argent.</p>
+        </div>
+        <div className="balance-actions">
+          <Link to="/revenues/new" className="balance-action balance-action--income">+ Entrée</Link>
+          <Link to="/expenses/new" className="balance-action balance-action--expense">− Sortie</Link>
+        </div>
       </div>
 
-      <div className="home-actions">
-        {actions.map((action) => (
-          <Link key={action.to} className={`home-action ${action.tone}`} to={action.to}>
-            <span className="home-action__icon" aria-hidden="true">{action.icon}</span>
-            <span><strong>{action.title}</strong><small>{action.text}</small></span>
-            <span className="home-action__arrow" aria-hidden="true">→</span>
-          </Link>
-        ))}
+      <div className="balance-total">
+        <span>Solde de la période</span>
+        <strong className={(period?.solde || 0) < 0 ? 'text-danger' : ''}>{loading ? '…' : formatXOF(period?.solde || 0)}</strong>
+        <small>Du {startDate.split('-').reverse().join('/')} au {endDate.split('-').reverse().join('/')}</small>
       </div>
 
-      <Link className="home-insight" to="/dashboard">
-        <span><strong>Voir le tableau de bord</strong><small>Solde, évolution et répartition de tes dépenses.</small></span>
-        <span aria-hidden="true">→</span>
-      </Link>
+      <div className="history-filter" aria-label="Période de l'historique">
+        <div><label htmlFor="history-start">Du</label><input id="history-start" type="date" value={startDate} max={endDate} onChange={(event) => setStartDate(event.target.value)} /></div>
+        <div><label htmlFor="history-end">Au</label><input id="history-end" type="date" value={endDate} min={startDate} max={isoToday()} onChange={(event) => setEndDate(event.target.value)} /></div>
+        <button type="button" onClick={() => { setStartDate(isoMonthStart()); setEndDate(isoToday()); }}>Ce mois</button>
+      </div>
+
+      <div className="balance-summary-grid">
+        <article className="balance-summary balance-summary--income"><span className="balance-sign">+</span><div><small>Entrées</small><strong>{loading ? '…' : formatXOF(period?.revenus || 0)}</strong></div></article>
+        <article className="balance-summary balance-summary--expense"><span className="balance-sign">−</span><div><small>Sorties</small><strong>{loading ? '…' : formatXOF(period?.depenses || 0)}</strong></div></article>
+      </div>
+
+      <section className="history-section">
+        <div className="history-section__head"><div><h2>Historique</h2><p>Toutes les opérations de la période choisie.</p></div><Link to="/expenses">Voir toutes les transactions →</Link></div>
+        {error ? <p className="text-danger">{error}</p> : loading ? <p className="text-muted">Chargement de l’historique…</p> : transactions.length === 0 ? <p className="text-muted">Aucune opération pour cette période.</p> : (
+          <div className="history-table-wrap"><table className="history-table"><thead><tr><th>Date</th><th>Libellé</th><th>Type</th><th>Montant</th></tr></thead><tbody>
+            {transactions.map((transaction) => { const isIncome = transaction.type === 'revenu'; return <tr key={transaction.id}><td>{new Date(`${transaction.date}T00:00:00`).toLocaleDateString('fr-FR')}</td><td><strong>{transaction.category_name || transaction.categorie || 'Sans catégorie'}</strong>{transaction.description && <small>{transaction.description}</small>}</td><td><span className={isIncome ? 'history-type history-type--income' : 'history-type history-type--expense'}>{isIncome ? '+ Entrée' : '− Sortie'}</span></td><td className={isIncome ? 'history-amount history-amount--income' : 'history-amount history-amount--expense'}>{isIncome ? '+' : '−'}{formatXOF(Number(transaction.montant))}</td></tr>; })}
+          </tbody></table></div>
+        )}
+      </section>
     </section>
   );
 }

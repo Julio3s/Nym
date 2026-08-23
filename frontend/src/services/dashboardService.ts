@@ -5,6 +5,7 @@ export interface Summary {
   month: { depenses: number; revenus: number; count: number };
   solde: number;
   totaux: { depenses: number; revenus: number };
+  period: { date_debut: string; date_fin: string; depenses: number; revenus: number; solde: number };
 }
 
 export interface CategoryData {
@@ -20,8 +21,8 @@ export interface TimelineEntry {
 }
 
 export const dashboardService = {
-  async getSummary() {
-    const res = await api.get('/dashboard/summary/');
+  async getSummary(params?: { date_debut?: string; date_fin?: string }) {
+    const res = await api.get('/dashboard/summary/', { params });
     return res.data as Summary;
   },
 

@@ -1,6 +1,7 @@
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncMonth, Coalesce
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from datetime import timedelta, date
 import re
 import requests
@@ -217,11 +218,25 @@ class SummaryView(APIView):
         r_month = Expense.objects.filter(user=request.user, date__gte=start_of_month, type='revenu').aggregate(total=Sum('montant'), count=Count('id'))
         total_d = float(Expense.objects.filter(user=request.user, type='depense').aggregate(total=Sum('montant'))['total'] or 0)
         total_r = float(Expense.objects.filter(user=request.user, type='revenu').aggregate(total=Sum('montant'))['total'] or 0)
+        period_start = parse_date(request.query_params.get('date_debut', '')) or start_of_month
+        period_end = parse_date(request.query_params.get('date_fin', '')) or today
+        if period_end < period_start:
+            period_start, period_end = period_end, period_start
+        period = Expense.objects.filter(user=request.user, date__gte=period_start, date__lte=period_end)
+        period_d = float(period.filter(type='depense').aggregate(total=Sum('montant'))['total'] or 0)
+        period_r = float(period.filter(type='revenu').aggregate(total=Sum('montant'))['total'] or 0)
         return Response({
             'today': {'depenses': float(d_today['total'] or 0), 'revenus': float(r_today['total'] or 0), 'count': (d_today['count'] or 0) + (r_today['count'] or 0)},
             'month': {'depenses': float(d_month['total'] or 0), 'revenus': float(r_month['total'] or 0), 'count': (d_month['count'] or 0) + (r_month['count'] or 0)},
             'solde': total_r - total_d,
             'totaux': {'depenses': total_d, 'revenus': total_r},
+            'period': {
+                'date_debut': period_start.isoformat(),
+                'date_fin': period_end.isoformat(),
+                'depenses': period_d,
+                'revenus': period_r,
+                'solde': period_r - period_d,
+            },
         })
 
 
