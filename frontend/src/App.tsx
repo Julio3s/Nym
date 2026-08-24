@@ -16,6 +16,8 @@ import Profile from './pages/Profile';
 import RevenueNew from './pages/RevenueNew';
 import RevenueList from './pages/RevenueList';
 import RevenueSources from './pages/RevenueSources';
+import DebtList from './pages/DebtList';
+import DebtNew from './pages/DebtNew';
 
 function App() {
   return (
@@ -35,6 +37,8 @@ function App() {
             <Route path="/revenues" element={<PrivateRoute><Layout><RevenueList /></Layout></PrivateRoute>} />
             <Route path="/revenues/new" element={<PrivateRoute><Layout><RevenueNew /></Layout></PrivateRoute>} />
             <Route path="/revenue-sources" element={<PrivateRoute><Layout><RevenueSources /></Layout></PrivateRoute>} />
+            <Route path="/debts" element={<PrivateRoute><Layout><DebtList /></Layout></PrivateRoute>} />
+            <Route path="/debts/new" element={<PrivateRoute><Layout><DebtNew /></Layout></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Layout><Profile /></Layout></PrivateRoute>} />
           </Routes>
         </AuthProvider>

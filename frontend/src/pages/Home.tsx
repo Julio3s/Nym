@@ -11,6 +11,7 @@ export default function Home() {
   const [startDate, setStartDate] = useState(isoMonthStart);
   const [endDate, setEndDate] = useState(isoToday);
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [generalSummary, setGeneralSummary] = useState<Summary | null>(null);
   const [transactions, setTransactions] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,11 +22,13 @@ export default function Home() {
     setError('');
     Promise.all([
       dashboardService.getSummary({ date_debut: startDate, date_fin: endDate }),
+      dashboardService.getSummary(),
       expenseService.list({ date_debut: startDate, date_fin: endDate, page: 1, ordering: '-date' }),
     ])
-      .then(([summaryData, transactionsData]) => {
+      .then(([summaryData, generalSummaryData, transactionsData]) => {
         if (!active) return;
         setSummary(summaryData);
+        setGeneralSummary(generalSummaryData);
         setTransactions(transactionsData.results);
       })
       .catch(() => active && setError('Impossible de charger cet historique.'))
@@ -34,6 +37,7 @@ export default function Home() {
   }, [startDate, endDate]);
 
   const period = summary?.period;
+  const generalBalance = generalSummary?.solde || 0;
   return (
     <section className="home-page home-page--balance">
       <div className="balance-header">
@@ -49,12 +53,12 @@ export default function Home() {
       </div>
 
       <div className="balance-total">
-        <span>Solde de la période</span>
-        <strong className={(period?.solde || 0) < 0 ? 'text-danger' : ''}>{loading ? '…' : formatXOF(period?.solde || 0)}</strong>
-        <small>Du {startDate.split('-').reverse().join('/')} au {endDate.split('-').reverse().join('/')}</small>
+        <span>Solde général du compte</span>
+        <strong className={generalBalance < 0 ? 'text-danger' : ''}>{loading ? '…' : formatXOF(generalBalance)}</strong>
+        <small>Depuis la création de ton compte</small>
       </div>
 
-      <div className="history-filter" aria-label="Période de l'historique">
+      <div className="history-filter" aria-label="Filtrer les entrées et les sorties">
         <div><label htmlFor="history-start">Du</label><input id="history-start" type="date" value={startDate} max={endDate} onChange={(event) => setStartDate(event.target.value)} /></div>
         <div><label htmlFor="history-end">Au</label><input id="history-end" type="date" value={endDate} min={startDate} max={isoToday()} onChange={(event) => setEndDate(event.target.value)} /></div>
         <button type="button" onClick={() => { setStartDate(isoMonthStart()); setEndDate(isoToday()); }}>Ce mois</button>
@@ -66,8 +70,8 @@ export default function Home() {
       </div>
 
       <section className="history-section">
-        <div className="history-section__head"><div><h2>Historique</h2><p>Toutes les opérations de la période choisie.</p></div><Link to="/expenses">Voir toutes les transactions →</Link></div>
-        {error ? <p className="text-danger">{error}</p> : loading ? <p className="text-muted">Chargement de l’historique…</p> : transactions.length === 0 ? <p className="text-muted">Aucune opération pour cette période.</p> : (
+        <div className="history-section__head"><div><h2>Historique</h2><p>Les opérations de la période choisie.</p></div><Link to="/expenses">Voir toutes les transactions →</Link></div>
+        {error ? <p className="text-danger">{error}</p> : loading ? <p className="text-muted">Chargement de l’historique…</p> : transactions.length === 0 ? <p className="text-muted">Aucune opération enregistrée.</p> : (
           <div className="history-table-wrap"><table className="history-table"><thead><tr><th>Date</th><th>Libellé</th><th>Type</th><th>Montant</th></tr></thead><tbody>
             {transactions.map((transaction) => { const isIncome = transaction.type === 'revenu'; return <tr key={transaction.id}><td>{new Date(`${transaction.date}T00:00:00`).toLocaleDateString('fr-FR')}</td><td><strong>{transaction.category_name || transaction.categorie || 'Sans catégorie'}</strong>{transaction.description && <small>{transaction.description}</small>}</td><td><span className={isIncome ? 'history-type history-type--income' : 'history-type history-type--expense'}>{isIncome ? '+ Entrée' : '− Sortie'}</span></td><td className={isIncome ? 'history-amount history-amount--income' : 'history-amount history-amount--expense'}>{isIncome ? '+' : '−'}{formatXOF(Number(transaction.montant))}</td></tr>; })}
           </tbody></table></div>
