@@ -51,47 +51,60 @@ export default function Register() {
   };
 
   return (
-    <div className="auth-shell">
-      <div className="auth-card">
-        <h1>Inscription</h1>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>Nom d'utilisateur</label>
+    <div className="auth-shell auth-shell--register">
+      <div className="auth-card auth-card--register">
+        <div className="auth-brand" aria-label="Nym">
+          <span className="auth-brand__mark">N</span>
+          <span className="auth-brand__name">nym</span>
+        </div>
+        <div className="auth-heading">
+          <p className="auth-eyebrow">Un nouveau départ</p>
+          <h1>Créez votre équilibre.</h1>
+          <p>Organisez votre argent simplement et avancez avec plus de sérénité.</p>
+        </div>
+        {error && <p className="auth-error" role="alert">{error}</p>}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label htmlFor="register-username">Nom d'utilisateur</label>
             <input
+              id="register-username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
               required
-              style={{ width: '100%', padding: 8, margin: '8px 0' }}
             />
           </div>
-          <div>
-            <label>Email</label>
+          <div className="auth-field">
+            <label htmlFor="register-email">Adresse email</label>
             <input
+              id="register-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
-              style={{ width: '100%', padding: 8, margin: '8px 0' }}
             />
           </div>
-          <div>
-            <label>Mot de passe</label>
+          <div className="auth-field">
+            <label htmlFor="register-password">Mot de passe</label>
             <input
+              id="register-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
               required
               minLength={8}
-              style={{ width: '100%', padding: 8, margin: '8px 0' }}
             />
+            <span className="auth-field__hint">8 caractères minimum</span>
           </div>
-          <button type="submit" style={{ width: '100%', padding: 10, marginTop: 10 }}>
-            S'inscrire
+          <button className="auth-submit" type="submit">
+            <span>Créer mon compte</span>
+            <span aria-hidden="true">→</span>
           </button>
         </form>
-        <p style={{ marginTop: 16 }}>
+        <p className="auth-footer">
           Déjà un compte ? <Link to="/login">Se connecter</Link>
         </p>
       </div>
