@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Input from '../components/Input';
@@ -19,6 +21,8 @@ interface ProfileData {
 }
 
 export default function Profile() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -73,6 +77,11 @@ export default function Profile() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: 50 }}>Chargement...</div>;
 
   return (
@@ -121,6 +130,16 @@ export default function Profile() {
         <Input label="Nouveau mot de passe" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
         <Button onClick={handleChangePassword} loading={changingPassword} style={{ width: '100%' }}>
           Changer le mot de passe
+        </Button>
+      </Card>
+
+      <Card style={{ marginTop: 'var(--space-lg)' }}>
+        <h3 style={{ marginBottom: 'var(--space-xs)' }}>Session</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-md)' }}>
+          Quittez votre compte sur cet appareil.
+        </p>
+        <Button variant="danger" onClick={handleLogout} style={{ width: '100%' }}>
+          Se déconnecter
         </Button>
       </Card>
     </div>
