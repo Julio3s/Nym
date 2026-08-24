@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
+from expenses.models import Expense
+
 from .models import Debt
 
 
@@ -33,3 +35,10 @@ class DebtApiTests(APITestCase):
         debt.refresh_from_db()
         self.assertEqual(debt.montant_restant, 0)
         self.assertEqual(debt.statut, Debt.STATUS_PAID)
+        repayment = Expense.objects.get(user=self.user)
+        self.assertEqual(repayment.type, 'depense')
+        self.assertEqual(repayment.montant, 100)
+        self.assertIn('Banque', repayment.description)
+
+        self.client.post(reverse('debt-pay', args=[debt.id]))
+        self.assertEqual(Expense.objects.filter(user=self.user).count(), 1)
