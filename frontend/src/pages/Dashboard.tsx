@@ -28,9 +28,9 @@ export default function Dashboard() {
   ];
 
   return (
-    <div>
+    <div className="dashboard-page">
       {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
+      <div className="dashboard-page__header" style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: 'var(--font-size-4xl)', fontWeight: 800, marginBottom: '4px' }}>
           Bonjour, {user?.prenom || user?.username} 👋
         </h1>
@@ -42,7 +42,7 @@ export default function Dashboard() {
       {/* Cards */}
       <div className="dashboard-stats-grid">
         {cards.map((card, i) => (
-          <div key={i} style={{
+            <div key={i} className="dashboard-stat-card" style={{
             background: 'var(--color-surface)',
             borderRadius: 'var(--radius-lg)',
             padding: '24px',
@@ -55,7 +55,7 @@ export default function Dashboard() {
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-              <div style={{
+              <div className="dashboard-stat-card__icon" style={{
                 width: 48, height: 48, borderRadius: 'var(--radius-md)',
                 background: card.gradient,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -71,16 +71,16 @@ export default function Dashboard() {
       </div>
 
       {/* Quick actions */}
-      <div className="page-header-actions" style={{ marginBottom: '32px' }}>
-        <Link to="/expenses/new"><button style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', background: 'var(--gradient-primary)', color: 'white', fontWeight: 600, fontSize: 'var(--font-size-sm)', boxShadow: 'var(--shadow-primary)' }}>+ Dépense</button></Link>
-        <Link to="/revenues/new"><button style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', background: 'var(--gradient-success)', color: 'white', fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>+ Revenu</button></Link>
-        <Link to="/budgets"><button style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text)', fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>🎯 Budgets</button></Link>
+      <div className="page-header-actions dashboard-actions" style={{ marginBottom: '32px' }}>
+        <Link to="/expenses/new"><button className="dashboard-action dashboard-action--primary" style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', background: 'var(--gradient-primary)', color: 'white', fontWeight: 600, fontSize: 'var(--font-size-sm)', boxShadow: 'var(--shadow-primary)' }}>+ Dépense</button></Link>
+        <Link to="/revenues/new"><button className="dashboard-action dashboard-action--success" style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', background: 'var(--gradient-success)', color: 'white', fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>+ Revenu</button></Link>
+        <Link to="/budgets"><button className="dashboard-action dashboard-action--neutral" style={{ padding: '12px 24px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text)', fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>🎯 Budgets</button></Link>
       </div>
 
       {/* Charts */}
       <div className="dashboard-charts-grid">
         {/* Pie */}
-        <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
+        <div className="dashboard-panel" style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
           <h3 style={{ marginBottom: '20px', fontSize: 'var(--font-size-lg)' }}>Répartition des dépenses par catégorie</h3>
           {loading ? <p style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>Chargement...</p> :
            categories.length === 0 ? <p style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>Aucune dépense ce mois</p> :
@@ -96,7 +96,7 @@ export default function Dashboard() {
         </div>
 
         {/* Line */}
-        <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
+        <div className="dashboard-panel" style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
           <h3 style={{ marginBottom: '20px', fontSize: 'var(--font-size-lg)' }}>Évolution mensuelle des dépenses</h3>
           {loading ? <p style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>Chargement...</p> :
            timeline.length === 0 ? <p style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>Aucune donnée</p> :
@@ -114,7 +114,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent revenues */}
-      <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
+      <div className="dashboard-panel dashboard-panel--recent" style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
           <div className="card-row" style={{ marginBottom: '20px' }}>
           <h3 style={{ fontSize: 'var(--font-size-lg)' }}>Derniers revenus</h3>
           <Link to="/revenues" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>Voir tout →</Link>

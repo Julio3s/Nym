@@ -24,6 +24,7 @@ body {
   line-height: var(--line-height);
   color: var(--color-text);
   background-color: var(--color-bg);
+  background-image: radial-gradient(circle at 10% 0%, rgba(99, 102, 241, 0.08), transparent 28%), radial-gradient(circle at 90% 100%, rgba(16, 185, 129, 0.05), transparent 24%);
   transition: background-color var(--transition-base), color var(--transition-base);
   min-height: 100vh;
   width: 100%;
@@ -147,7 +148,7 @@ h4 { font-size: var(--font-size-lg); }
   display: flex;
   align-items: center;
   gap: 36px;
-  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 86%, transparent);
   border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(14px);
 }
@@ -160,10 +161,38 @@ h4 { font-size: var(--font-size-lg); }
 .app-topbar__actions { display: flex; align-items: center; gap: 8px; }
 .app-topbar__actions button { color: var(--color-text-secondary); padding: 8px 10px; border-radius: var(--radius-md); font-size: var(--font-size-sm); }
 .app-topbar__quick { padding: 9px 13px; color: #fff; border-radius: var(--radius-md); background: var(--gradient-primary); font-size: var(--font-size-sm); font-weight: 700; }
+.app-topbar__quick:hover { color: #fff; transform: translateY(-1px); box-shadow: var(--shadow-primary); }
 .app-user { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--gradient-primary); font-size: var(--font-size-sm); font-weight: 700; }
 .app-logout:hover { color: var(--color-danger) !important; background: var(--color-danger-light); }
 .app-content--topnav { margin-left: 0; min-height: calc(100vh - 72px); }
 .app-bottomnav { display: none; }
+
+.app-card { position: relative; overflow: hidden; transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast) !important; }
+.app-card:hover { border-color: var(--color-border-hover) !important; box-shadow: var(--shadow-md) !important; }
+.app-page > .app-card, .page-panel > .app-card { margin-bottom: var(--space-lg); }
+
+.app-field label { letter-spacing: .01em; }
+.app-input { min-height: 44px; background: var(--color-bg-secondary) !important; transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast) !important; }
+.app-input:hover { border-color: var(--color-border-hover) !important; }
+.app-input:focus { border-color: var(--color-primary) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent); background: var(--color-surface) !important; }
+
+.page-panel { max-width: 900px; }
+.page-panel > h1 { margin-bottom: var(--space-xl) !important; }
+.page-panel > .app-card h3 { color: var(--color-text); }
+
+.dashboard-page { padding-bottom: var(--space-2xl); }
+.dashboard-page__header h1 { letter-spacing: -0.04em; }
+.dashboard-stats-grid > .dashboard-stat-card { position: relative; overflow: hidden; }
+.dashboard-stat-card::after { content: ''; position: absolute; width: 120px; height: 120px; right: -48px; top: -52px; border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent); border-radius: 50%; pointer-events: none; }
+.dashboard-stat-card__icon { box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16); }
+.dashboard-actions { gap: 12px; }
+.dashboard-action { transition: transform var(--transition-fast), filter var(--transition-fast), box-shadow var(--transition-fast); }
+.dashboard-action:hover { color: #fff !important; filter: saturate(1.12) brightness(1.04); transform: translateY(-2px); }
+.dashboard-action--neutral:hover { color: var(--color-text) !important; background: var(--color-surface-hover) !important; }
+.dashboard-panel { overflow: hidden; transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
+.dashboard-panel:hover { border-color: var(--color-border-hover) !important; box-shadow: var(--shadow-md) !important; }
+.dashboard-panel h3 { letter-spacing: -0.01em; }
+.dashboard-panel--recent { margin-top: var(--space-xl); }
 
 .home-page { max-width: 920px; margin: 52px auto; }
 .home-hero { margin-bottom: 32px; }

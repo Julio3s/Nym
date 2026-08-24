@@ -8,7 +8,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, style, ...props }, ref) => {
     return (
-      <div style={{ marginBottom: 'var(--space-md)' }}>
+      <div className="app-field" style={{ marginBottom: 'var(--space-md)' }}>
         {label && (
           <label
             style={{
@@ -23,6 +23,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <input
+          className="app-input"
           ref={ref}
           style={{
             width: '100%',

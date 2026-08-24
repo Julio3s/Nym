@@ -9,6 +9,7 @@ interface CardProps {
 export default function Card({ children, style, padding = 'var(--space-lg)' }: CardProps) {
   return (
     <div
+      className="app-card"
       style={{
         backgroundColor: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
