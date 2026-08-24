@@ -49,13 +49,13 @@ export default function Home() {
         <div className="balance-actions">
           <Link to="/revenues/new" className="balance-action balance-action--income">+ Entrée</Link>
           <Link to="/expenses/new" className="balance-action balance-action--expense">− Sortie</Link>
+          <Link to="/debts" className="balance-action balance-action--debt">Mes dettes</Link>
         </div>
       </div>
 
       <div className="balance-total">
-        <span>Solde général du compte</span>
+        <span>SOLDE</span>
         <strong className={generalBalance < 0 ? 'text-danger' : ''}>{loading ? '…' : formatXOF(generalBalance)}</strong>
-        <small>Depuis la création de ton compte</small>
       </div>
 
       <div className="history-filter" aria-label="Filtrer les entrées et les sorties">

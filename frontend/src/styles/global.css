@@ -257,6 +257,8 @@ h4 { font-size: var(--font-size-lg); }
 .balance-action { padding: 11px 15px; border-radius: var(--radius-md); font-weight: 700; font-size: var(--font-size-sm); }
 .balance-action--income { color: #fff; background: var(--gradient-success); }
 .balance-action--expense { color: #fff; background: var(--gradient-danger); }
+.balance-action--debt { color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); }
+.balance-action--debt:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-light); }
 .balance-total { padding: 28px; border-radius: var(--radius-lg); color: #fff; background: var(--gradient-primary); box-shadow: var(--shadow-primary); }
 .balance-total span, .balance-total small, .balance-total strong { display: block; }
 .balance-total span { font-size: var(--font-size-sm); opacity: .85; }
@@ -652,7 +654,7 @@ h4 { font-size: var(--font-size-lg); }
   .app-topbar__actions { margin-left: auto; }
   .app-topbar__quick { display: none; }
   .app-content--topnav { min-height: calc(100vh - 60px); }
-  .app-bottomnav { position: fixed; z-index: 200; left: 0; right: 0; bottom: 0; height: 68px; padding: 6px 8px env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(4, 1fr); background: color-mix(in srgb, var(--color-surface) 94%, transparent); border-top: 1px solid var(--color-border); backdrop-filter: blur(14px); }
+  .app-bottomnav { position: fixed; z-index: 200; left: 0; right: 0; bottom: 0; height: 68px; padding: 6px 8px env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: color-mix(in srgb, var(--color-surface) 94%, transparent); border-top: 1px solid var(--color-border); backdrop-filter: blur(14px); }
   .app-bottomnav a { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; color: var(--color-text-muted); font-size: 0.68rem; font-weight: 600; }
   .app-bottomnav a span { font-size: 1.25rem; line-height: 1; }
   .app-bottomnav a.is-active { color: var(--color-primary); }
@@ -661,7 +663,7 @@ h4 { font-size: var(--font-size-lg); }
   .home-action { min-height: 100px; padding: 18px; }
   .balance-header { align-items: flex-start; flex-direction: column; }
   .balance-actions { width: 100%; }
-  .balance-action { flex: 1; text-align: center; }
+  .balance-action { flex: 1 1 30%; text-align: center; }
   .history-section__head { flex-direction: column; }
   .app-sidebar {
     width: 288px;
