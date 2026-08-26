@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './hooks/useTheme';
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute, { DatabaseManagerRoute } from './components/PrivateRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -18,6 +18,7 @@ import RevenueList from './pages/RevenueList';
 import RevenueSources from './pages/RevenueSources';
 import DebtList from './pages/DebtList';
 import DebtNew from './pages/DebtNew';
+import DatabaseManagement from './pages/DatabaseManagement';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/debts" element={<PrivateRoute><Layout><DebtList /></Layout></PrivateRoute>} />
             <Route path="/debts/new" element={<PrivateRoute><Layout><DebtNew /></Layout></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Layout><Profile /></Layout></PrivateRoute>} />
+            <Route path="/gestion-bd" element={<DatabaseManagerRoute><Layout><DatabaseManagement /></Layout></DatabaseManagerRoute>} />
           </Routes>
         </AuthProvider>
       </ThemeProvider>

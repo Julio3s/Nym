@@ -12,7 +12,7 @@ const primaryNav = [
 ];
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, logout, isDatabaseManager } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -30,6 +30,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
         <nav className="app-topnav__links" aria-label="Navigation principale">
           {primaryNav.map((item) => <Link key={item.path} to={item.path} className={isActive(item.path) ? 'is-active' : ''}>{item.label}</Link>)}
+          {isDatabaseManager && <Link to="/gestion-bd" className={isActive('/gestion-bd') ? 'is-active' : ''}>Gestion BD</Link>}
         </nav>
 
         <div className="app-topbar__actions">

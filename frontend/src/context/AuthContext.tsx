@@ -12,6 +12,7 @@ interface User {
   adresse?: string;
   ville?: string;
   pays?: string;
+  is_database_manager?: boolean;
 }
 
 interface AuthContextType {
@@ -21,6 +22,7 @@ interface AuthContextType {
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isDatabaseManager: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         isAuthenticated: !!user,
+        isDatabaseManager: user?.is_database_manager === true,
       }}
     >
       {children}
