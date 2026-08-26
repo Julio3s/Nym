@@ -5,18 +5,24 @@ import { useAuth } from '../context/AuthContext';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError('');
+    setIsSubmitting(true);
     try {
       await login(email, password);
       navigate('/');
     } catch {
       setError('Email ou mot de passe incorrect');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -50,18 +56,32 @@ export default function Login() {
               <label htmlFor="login-password">Mot de passe</label>
               <span className="auth-help-link">Oublié ?</span>
             </div>
-            <input
-              id="login-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-            />
+            <div className="auth-password-input">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+              <button
+                className="auth-password-toggle"
+                type="button"
+                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((visible) => !visible)}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                  <circle cx="12" cy="12" r="2.5" />
+                </svg>
+              </button>
+            </div>
           </div>
-          <button className="auth-submit" type="submit">
-            <span>Se connecter</span>
-            <span aria-hidden="true">→</span>
+          <button className="auth-submit" type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+            <span>{isSubmitting ? 'Connexion...' : 'Se connecter'}</span>
+            {isSubmitting ? <span className="auth-spinner" aria-hidden="true" /> : <span aria-hidden="true">→</span>}
           </button>
         </form>
         <p className="auth-footer">
