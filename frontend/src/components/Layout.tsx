@@ -13,6 +13,8 @@ const primaryNav = [
   { path: '/subscriptions', label: 'Abonnements', icon: 'A' },
 ];
 
+const mobileNav = primaryNav.filter((item) => !['/invoices', '/subscriptions'].includes(item.path));
+
 export default function Layout({ children }: { children: ReactNode }) {
   const { user, logout, isDatabaseManager } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -46,7 +48,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <main className="app-content app-content--topnav"><div className="fade-in app-page">{children}</div></main>
 
       <nav className="app-bottomnav" aria-label="Navigation mobile">
-        {primaryNav.map((item) => <Link key={item.path} to={item.path} className={isActive(item.path) ? 'is-active' : ''}><span>{item.icon}</span>{item.label}</Link>)}
+        {mobileNav.map((item) => <Link key={item.path} to={item.path} className={isActive(item.path) ? 'is-active' : ''}><span>{item.icon}</span>{item.label}</Link>)}
       </nav>
     </div>
   );
