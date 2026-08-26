@@ -11,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from decouple import config
 from expenses.models import Expense, Category, RevenueSource
 from budgets.models import Budget
+from subscriptions.models import Subscription
+from subscriptions.services import ensure_charges
 
 
 class ChatView(APIView):
@@ -210,6 +212,8 @@ class SummaryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        for subscription in Subscription.objects.filter(user=request.user, status=Subscription.ACTIVE):
+            ensure_charges(subscription)
         today = timezone.now().date()
         start_of_month, _ = _parse_month(today)
         d_today = Expense.objects.filter(user=request.user, date=today, type='depense').aggregate(total=Sum('montant'), count=Count('id'))

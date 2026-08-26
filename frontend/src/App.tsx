@@ -19,6 +19,8 @@ import RevenueSources from './pages/RevenueSources';
 import DebtList from './pages/DebtList';
 import DebtNew from './pages/DebtNew';
 import DatabaseManagement from './pages/DatabaseManagement';
+import InvoiceList from './pages/InvoiceList';
+import SubscriptionList from './pages/SubscriptionList';
 
 function App() {
   return (
@@ -42,6 +44,8 @@ function App() {
             <Route path="/debts/new" element={<PrivateRoute><Layout><DebtNew /></Layout></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Layout><Profile /></Layout></PrivateRoute>} />
             <Route path="/gestion-bd" element={<DatabaseManagerRoute><Layout><DatabaseManagement /></Layout></DatabaseManagerRoute>} />
+            <Route path="/invoices" element={<PrivateRoute><Layout><InvoiceList /></Layout></PrivateRoute>} />
+            <Route path="/subscriptions" element={<PrivateRoute><Layout><SubscriptionList /></Layout></PrivateRoute>} />
           </Routes>
         </AuthProvider>
       </ThemeProvider>

@@ -9,6 +9,8 @@ const primaryNav = [
   { path: '/revenues', label: 'Revenus', icon: '+' },
   { path: '/budgets', label: 'Budgets', icon: '◎' },
   { path: '/debts', label: 'Dettes', icon: 'D' },
+  { path: '/invoices', label: 'Factures', icon: 'F' },
+  { path: '/subscriptions', label: 'Abonnements', icon: 'A' },
 ];
 
 export default function Layout({ children }: { children: ReactNode }) {

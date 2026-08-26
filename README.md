@@ -16,6 +16,8 @@ Application web de finances personnelles (français / FCFA) :
 - 📊 Dashboard : solde, résumé du jour/mois, graphiques (donut + évolution)
 - 🤖 Assistant IA : conseils personnalisés + ajout de données sans quitter le chat
 - 📥 Export CSV des transactions (respecte les filtres actifs)
+- 🧾 Factures : types personnalisés, statut payée/non payée, paiement intégré au solde et historique filtrable
+- 🔁 Abonnements : prix mensuel fixe, prélèvements idempotents et résiliation sans perte d'historique
 - 🌗 Thème clair / sombre persistant
 - 🎨 Design moderne : sticker-rain animé, responsive, FCFA partout
 
@@ -78,6 +80,10 @@ sont créées automatiquement à la création de chaque compte.
 | GET     | `/api/dashboard/by-category/`            | Répartition par catégorie (mois/type)  |
 | GET     | `/api/dashboard/timeline/`               | Évolution mensuelle                    |
 | POST    | `/api/chat/`                             | Assistant IA (actions automatiques)    |
+| GET/POST| `/api/invoices/`, `/api/invoice-types/`    | Factures et types personnalisés        |
+| POST    | `/api/invoices/:id/pay/`                  | Marquer une facture payée               |
+| GET/POST| `/api/subscriptions/`                     | Abonnements mensuels                    |
+| POST    | `/api/subscriptions/:id/cancel/`          | Résilier un abonnement                  |
 
 Toutes les routes `api/*` requièrent le header : `Authorization: Bearer <access>`
 (sauf register/login/refresh).
