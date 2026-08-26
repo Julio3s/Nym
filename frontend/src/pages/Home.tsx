@@ -50,6 +50,8 @@ export default function Home() {
           <Link to="/revenues/new" className="balance-action balance-action--income">+ Entrée</Link>
           <Link to="/expenses/new" className="balance-action balance-action--expense">− Sortie</Link>
           <Link to="/debts" className="balance-action balance-action--debt">Mes dettes</Link>
+          <Link to="/invoices" className="balance-action balance-action--debt">Factures</Link>
+          <Link to="/subscriptions" className="balance-action balance-action--debt">Abonnements</Link>
         </div>
       </div>
 
