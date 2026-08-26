@@ -33,6 +33,8 @@ class UserSerializer(serializers.ModelSerializer):
             'adresse', 'ville', 'pays',
         )
         read_only_fields = ('id', 'date_joined')
-                
+
+
+
 
 
